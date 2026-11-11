@@ -128,7 +128,7 @@
         <h2 id="enquire-title" class="h5 mb-1">Interested in this property?</h2>
         <p class="small text-meta">Our team will get back to you with details and visit options.</p>
         <div class="d-grid gap-2 mb-3">
-          {% if site.phone %}<a class="btn btn-primary" href="tel:{{ site.phone_href }}">{% icon "phone" 18 %} Call {{ site.phone }}</a>{% endif %}
+          {% if site.phone %}<a class="btn btn-secondary-hm" href="tel:{{ site.phone_href }}">{% icon "phone" 18 %} Call {{ site.phone }}</a>{% endif %}
           {% if site.whatsapp_digits %}<a class="btn btn-wa" href="{% url 'leads:whatsapp' %}?property={{ property.listing_id }}" rel="nofollow">{% icon "message-circle" 18 %} WhatsApp</a>{% endif %}
         </div>
         {% include "includes/enquiry_form.html" with submit_label="Request details / site visit" %}

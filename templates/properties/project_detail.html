@@ -39,7 +39,7 @@
       <aside class="hm-card hm-card-body contact-card" id="enquire" aria-labelledby="enq-title">
         <h2 id="enq-title" class="h5">Get project details</h2>
         <div class="d-grid gap-2 mb-3">
-          {% if site.phone %}<a class="btn btn-primary" href="tel:{{ site.phone_href }}">{% icon "phone" 18 %} Call {{ site.phone }}</a>{% endif %}
+          {% if site.phone %}<a class="btn btn-secondary-hm" href="tel:{{ site.phone_href }}">{% icon "phone" 18 %} Call {{ site.phone }}</a>{% endif %}
           {% if site.whatsapp_digits %}<a class="btn btn-wa" href="{% url 'leads:whatsapp' %}?project={{ project.slug }}" rel="nofollow">{% icon "message-circle" 18 %} WhatsApp</a>{% endif %}
         </div>
         {% include "includes/enquiry_form.html" with submit_label="Request details" %}

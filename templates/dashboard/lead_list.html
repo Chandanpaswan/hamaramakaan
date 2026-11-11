@@ -35,7 +35,7 @@
           <td><span class="hm-badge {% if l.status == 'new' %}hm-badge-featured{% elif l.status == 'converted' %}hm-badge-verified{% elif not l.is_open %}hm-badge-muted{% else %}hm-badge-info{% endif %}">{{ l.get_status_display }}</span></td>
           <td class="small">{{ l.get_priority_display }}</td>
           <td class="small">{{ l.assigned_to|default:"—" }}</td>
-          <td class="small text-nowrap {% if l.follow_up_overdue %}text-danger fw-semibold{% endif %}">{{ l.next_follow_up|date:"j M"|default:"—" }}</td>
+          <td class="small text-nowrap {% if l.follow_up_overdue %}text-danger fw-semibold{% endif %}">{{ l.next_follow_up|date:"j M"|default:"—" }}{% if l.follow_up_overdue %} · overdue{% endif %}</td>
           <td class="small text-nowrap">{{ l.created_at|date:"j M, H:i" }}</td>
         </tr>
       {% empty %}<tr><td colspan="9" class="text-center text-meta py-4">No leads match these filters.</td></tr>{% endfor %}

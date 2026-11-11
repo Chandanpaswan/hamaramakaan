@@ -44,7 +44,9 @@
   --bs-focus-ring-color: rgba(29, 78, 216, .25);
 }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-padding-top: 88px; } /* keep anchor targets and focused fields clear of the sticky header */
+a, button, input, select, textarea, label, summary { touch-action: manipulation; }
+@media (max-width: 991.98px) { html { scroll-padding-top: 76px; scroll-padding-bottom: 144px; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition: none !important; animation: none !important; } }
 body { -webkit-font-smoothing: antialiased; line-height: 1.6; overflow-x: hidden; }
 h1, h2, h3, h4, h5, .font-head { font-family: var(--font-head); color: var(--hm-ink); letter-spacing: -.01em; font-weight: 700; }
@@ -132,6 +134,7 @@ a { text-underline-offset: 2px; }
 .search-panel .btn-search { height: 52px; width: 100%; }
 .popular-chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; font-size: .82rem; color: var(--hm-slate-500); }
 .chip { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: 999px; background: #fff; border: 1px solid var(--hm-slate-300); font-weight: 500; font-size: .84rem; color: var(--hm-slate-700); text-decoration: none; }
+.chip, .city-link { transition: border-color .2s ease, color .2s ease, box-shadow .2s ease; }
 .chip:hover { border-color: var(--hm-blue); color: var(--hm-blue); }
 .chip.on { background: var(--hm-mist); border-color: var(--hm-blue); color: var(--hm-deep); font-weight: 600; }
 
@@ -245,6 +248,8 @@ textarea.form-control { min-height: auto; }
 .rich-text p, .rich-text li { color: var(--hm-slate-700); }
 .rich-text ul, .rich-text ol { padding-left: 1.25rem; }
 .rich-text > :first-child { margin-top: 0; }
+.rich-text p, .rich-text li { max-width: 72ch; }
+.search-label { display: block; font-size: .75rem; font-weight: 600; color: var(--hm-slate-500); margin-bottom: 4px; }
 .preview-banner { background: var(--hm-warning-tint); color: var(--hm-warning); padding: 10px 0; font-weight: 600; font-size: .88rem; border-bottom: 1px solid #F5DDAD; }
 .mobile-cta { display: none; }
 @media (max-width: 991.98px) {

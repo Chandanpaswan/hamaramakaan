@@ -151,6 +151,32 @@
     filter();
   });
 
+  // Submit feedback: spinner + disabled button while a POST is sending (also stops double submits).
+  document.querySelectorAll("form[method=post]").forEach(function (form) {
+    form.addEventListener("submit", function (e) {
+      var btn = e.submitter || form.querySelector("[type=submit]");
+      if (!btn || btn.disabled) return;
+      form.setAttribute("aria-busy", "true");
+      // Disable after the browser has captured the form data, so the clicked button's value is still sent.
+      setTimeout(function () {
+        btn.disabled = true;
+        btn.insertAdjacentHTML("afterbegin", '<span class="spinner-border spinner-border-sm" aria-hidden="true" data-busy></span>');
+      }, 0);
+    });
+  });
+  window.addEventListener("pageshow", function (e) { // restore buttons when returning via the back button
+    if (!e.persisted) return;
+    document.querySelectorAll("[data-busy]").forEach(function (s) { s.parentNode.disabled = false; s.remove(); });
+    document.querySelectorAll("form[aria-busy]").forEach(function (f) { f.removeAttribute("aria-busy"); });
+  });
+
+  // After a failed submit, take keyboard and screen-reader users straight to the first problem.
+  var firstInvalid = document.querySelector("form[method=post] .is-invalid");
+  if (firstInvalid) {
+    firstInvalid.focus({ preventScroll: true });
+    firstInvalid.scrollIntoView({ block: "center" });
+  }
+
   // Confirmation for destructive actions.
   document.querySelectorAll("[data-confirm]").forEach(function (el) {
     el.addEventListener("click", function (e) {

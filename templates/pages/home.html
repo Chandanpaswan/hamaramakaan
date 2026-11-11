@@ -40,27 +40,27 @@
       <button type="button" class="nav-link" aria-pressed="false" data-search-tab data-action="{% url 'properties:commercial' %}" data-budget="sale">Commercial</button>
       <a class="nav-link d-none d-sm-block" href="{% url 'properties:projects' %}">New Projects</a>
     </div>
-    <div class="row g-2 g-md-3">
+    <div class="row g-2 g-md-3 align-items-end">
       <div class="col-md-3">
-        <label class="visually-hidden" for="hs-city">City</label>
+        <label class="search-label" for="hs-city">City</label>
         <select class="form-select" id="hs-city" name="city">
           <option value="">All cities</option>
           {% for c in search_cities %}<option value="{{ c.slug }}" {% if c.slug == 'faridabad' %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
         </select>
       </div>
       <div class="col-md-3">
-        <label class="visually-hidden" for="hs-q">Locality, project or keyword</label>
+        <label class="search-label" for="hs-q">Locality or project</label>
         <input class="form-control" id="hs-q" type="search" name="q" maxlength="100" placeholder="Locality, project or landmark">
       </div>
       <div class="col-6 col-md-2">
-        <label class="visually-hidden" for="hs-type">Property type</label>
+        <label class="search-label" for="hs-type">Property type</label>
         <select class="form-select" id="hs-type" name="type">
           <option value="">Any type</option>
           {% for t in property_types %}<option value="{{ t.slug }}">{{ t.name }}</option>{% endfor %}
         </select>
       </div>
       <div class="col-6 col-md-2">
-        <label class="visually-hidden" for="hs-budget">Budget</label>
+        <label class="search-label" for="hs-budget">Budget</label>
         <select class="form-select" id="hs-budget" name="budget">
           {% for value, label in sale_budgets %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
         </select>
@@ -79,8 +79,17 @@
 </div>
 {{ budget_presets|json_script:"budget-presets" }}
 
+<section class="section" aria-labelledby="types-title">
+  <div class="container">
+    <div class="section-head"><div><h2 id="types-title">Browse by property type</h2><p>Homes, plots and commercial spaces</p></div></div>
+    <div class="row g-3">
+      {% for t in tiles %}<div class="col-6 col-md-3 col-xl-3"><a class="tile-link" href="{{ t.url }}"><img src="{% static 'images/tiles/tile-'|add:t.tile|add:'.svg' %}" alt="" width="64" height="64" loading="lazy">{{ t.label }}</a></div>{% endfor %}
+    </div>
+  </div>
+</section>
+
 {% if featured %}
-<section class="section pb-0" aria-labelledby="featured-title">
+<section class="section pt-0" aria-labelledby="featured-title">
   <div class="container">
     <div class="section-head">
       <div><h2 id="featured-title">Handpicked for you</h2><p>Featured listings reviewed by our team</p></div>
@@ -91,14 +100,18 @@
 </section>
 {% endif %}
 
-<section class="section" aria-labelledby="types-title">
+{% if highlights %}
+<section class="section" aria-labelledby="why-title">
   <div class="container">
-    <div class="section-head"><div><h2 id="types-title">Browse by property type</h2><p>Homes, plots and commercial spaces</p></div></div>
-    <div class="row g-3">
-      {% for t in tiles %}<div class="col-6 col-md-3 col-xl-3"><a class="tile-link" href="{{ t.url }}"><img src="{% static 'images/tiles/tile-'|add:t.tile|add:'.svg' %}" alt="" width="64" height="64" loading="lazy">{{ t.label }}</a></div>{% endfor %}
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-4"><h2 id="why-title">Why choose {{ site.brand_name }}</h2><p class="text-meta">{{ site.tagline_english }} We keep property search simple, honest and local.</p><a class="btn btn-secondary-hm mt-2" href="{% url 'pages:about' %}">About us</a></div>
+      <div class="col-lg-8"><div class="row g-4">
+        {% for h in highlights %}<div class="col-sm-6"><div class="feature"><span class="feature-icon">{% icon h.icon 22 %}</span><div><h3>{{ h.title }}</h3><p>{{ h.text }}</p></div></div></div>{% endfor %}
+      </div></div>
     </div>
   </div>
 </section>
+{% endif %}
 
 {% if cities %}
 <section class="section pt-0" aria-labelledby="cities-title">
@@ -127,18 +140,11 @@
 </section>
 {% endif %}
 
-{% if highlights %}
-<section class="section" aria-labelledby="why-title">
-  <div class="container">
-    <div class="row g-4 align-items-center">
-      <div class="col-lg-4"><h2 id="why-title">Why choose {{ site.brand_name }}</h2><p class="text-meta">{{ site.tagline_english }} We keep property search simple, honest and local.</p><a class="btn btn-secondary-hm mt-2" href="{% url 'pages:about' %}">About us</a></div>
-      <div class="col-lg-8"><div class="row g-4">
-        {% for h in highlights %}<div class="col-sm-6"><div class="feature"><span class="feature-icon">{% icon h.icon 22 %}</span><div><h3>{{ h.title }}</h3><p>{{ h.text }}</p></div></div></div>{% endfor %}
-      </div></div>
-    </div>
-  </div>
-</section>
-{% endif %}
+
+
+
+
+
 
 {% if services %}
 <section class="section bg-cream" aria-labelledby="services-title">
