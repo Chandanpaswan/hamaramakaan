@@ -161,7 +161,7 @@ textarea.form-control { min-height: auto; }
 .property-card { background: #fff; border: 1px solid var(--hm-slate-100); border-radius: 16px; box-shadow: var(--shadow-2); overflow: hidden; height: 100%; display: flex; flex-direction: column; transition: transform .15s ease, box-shadow .15s ease; position: relative; }
 .property-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-3); }
 .property-card .pc-media { position: relative; aspect-ratio: 4 / 3; background: var(--hm-mist); overflow: hidden; display: block; }
-.property-card .pc-media img, .property-card .pc-media svg { width: 100%; height: 100%; object-fit: cover; display: block; }
+.property-card .pc-media > img, .property-card .pc-media > svg { width: 100%; height: 100%; object-fit: cover; display: block; }
 .property-card .pc-badges { position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; z-index: 2; }
 .property-card .pc-count { position: absolute; bottom: 10px; right: 10px; background: rgba(15, 27, 51, .72); color: #fff; font-size: 11.5px; font-weight: 500; border-radius: 6px; padding: 2px 8px; display: flex; gap: 4px; align-items: center; z-index: 2; }
 .property-card .pc-body { padding: 14px 16px 16px; display: flex; flex-direction: column; flex: 1; }
