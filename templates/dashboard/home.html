@@ -1,0 +1,79 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Overview{% endblock %}{% block heading %}Overview{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Welcome, {{ user.first_name|default:user.username }}</h1>
+
+{% if launch_checklist and not launch_ready %}
+<div class="panel mb-4 border-warning">
+  <div class="panel-head"><h2>{% icon "bell" 18 %} Launch checklist</h2><a class="small" href="{% url 'dashboard:settings' %}">Open settings</a></div>
+  <div class="panel-body"><ul class="checklist row row-cols-1 row-cols-md-3 g-2">
+    {% for label, ok in launch_checklist %}<li class="col">{% if ok %}<span class="ok">{% icon "badge-check" 18 %}</span>{% else %}<span class="todo">{% icon "bell" 18 %}</span>{% endif %} {{ label }}</li>{% endfor %}
+  </ul></div>
+</div>
+{% endif %}
+
+{% if property_stats %}
+<div class="row g-3 mb-3">
+  <div class="col-6 col-xl-3"><a class="kpi" href="{% url 'dashboard:property_list' %}?status=published"><small>Active listings</small><strong>{{ property_stats.active }}</strong></a></div>
+  <div class="col-6 col-xl-3"><a class="kpi" href="{% url 'dashboard:property_list' %}?status=pending"><small>Pending approval</small><strong>{{ property_stats.pending }}</strong></a></div>
+  <div class="col-6 col-xl-3"><a class="kpi" href="{% url 'dashboard:property_list' %}?status=sold"><small>Sold / rented</small><strong>{{ property_stats.closed }}</strong></a></div>
+  <div class="col-6 col-xl-3"><div class="kpi"><small>Inactive / draft</small><strong>{{ property_stats.inactive }}</strong></div></div>
+</div>
+{% endif %}
+{% if lead_stats %}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3"><a class="kpi" href="{% url 'dashboard:lead_list' %}?status=new"><small>New leads</small><strong>{{ lead_stats.new }}</strong></a></div>
+  <div class="col-6 col-xl-3"><div class="kpi"><small>Leads today</small><strong>{{ lead_stats.today }}</strong></div></div>
+  <div class="col-6 col-xl-3"><a class="kpi" href="{% url 'dashboard:lead_list' %}?due=1"><small>Follow-ups due</small><strong>{{ lead_stats.due }}</strong></a></div>
+  <div class="col-6 col-xl-3"><div class="kpi"><small>Open leads</small><strong>{{ lead_stats.open }}</strong></div></div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+  {% if followups is not None %}
+  <div class="col-xl-6">
+    <section class="panel h-100"><div class="panel-head"><h2>Follow-ups due</h2><a class="small" href="{% url 'dashboard:lead_list' %}?due=1">View all</a></div>
+      <div class="table-responsive"><table class="table table-dash"><thead><tr><th>Lead</th><th>Status</th><th>Due</th><th>Assigned</th></tr></thead><tbody>
+        {% for l in followups %}<tr><td><a href="{% url 'dashboard:lead_detail' l.pk %}">{{ l.lead_id }} · {{ l.name }}</a></td><td>{{ l.get_status_display }}</td><td class="{% if l.follow_up_overdue %}text-danger fw-semibold{% endif %}">{{ l.next_follow_up|date:"j M" }}</td><td>{{ l.assigned_to|default:"—" }}</td></tr>
+        {% empty %}<tr><td colspan="4" class="text-meta">Nothing due. </td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+  </div>
+  <div class="col-xl-6">
+    <section class="panel h-100"><div class="panel-head"><h2>Recent leads</h2><a class="small" href="{% url 'dashboard:lead_list' %}">All leads</a></div>
+      <div class="table-responsive"><table class="table table-dash"><thead><tr><th>Lead</th><th>Source</th><th>Status</th><th>Received</th></tr></thead><tbody>
+        {% for l in recent_leads %}<tr><td><a href="{% url 'dashboard:lead_detail' l.pk %}">{{ l.lead_id }} · {{ l.name }}</a></td><td>{{ l.get_source_display }}</td><td>{{ l.get_status_display }}</td><td>{{ l.created_at|date:"j M, H:i" }}</td></tr>
+        {% empty %}<tr><td colspan="4" class="text-meta">No leads yet.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+  </div>
+  <div class="col-xl-4">
+    <section class="panel h-100"><div class="panel-head"><h2>Leads by status</h2></div>
+      <div class="table-responsive"><table class="table table-dash"><tbody>
+        {% for row in leads_by_status %}<tr><td><a href="{% url 'dashboard:lead_list' %}?status={{ row.status }}">{{ status_labels|get_item:row.status }}</a></td><td class="text-end fw-semibold">{{ row.n }}</td></tr>
+        {% empty %}<tr><td class="text-meta">No data.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+  </div>
+  {% endif %}
+  {% if recent_submissions is not None %}
+  <div class="col-xl-8">
+    <section class="panel h-100"><div class="panel-head"><h2>Recent owner submissions</h2><a class="small" href="{% url 'dashboard:property_list' %}?source=owner">View all</a></div>
+      <div class="table-responsive"><table class="table table-dash"><thead><tr><th>ID</th><th>Title</th><th>City</th><th>Status</th><th>Received</th></tr></thead><tbody>
+        {% for p in recent_submissions %}<tr><td>{{ p.listing_id }}</td><td><a href="{% url 'dashboard:property_detail' p.pk %}">{{ p.title|truncatechars:48 }}</a></td><td>{{ p.city }}</td><td>{{ p.get_status_display }}</td><td>{{ p.created_at|date:"j M" }}</td></tr>
+        {% empty %}<tr><td colspan="5" class="text-meta">No owner submissions yet.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+  </div>
+  {% endif %}
+  {% if recent_activity %}
+  <div class="col-12">
+    <section class="panel"><div class="panel-head"><h2>Recent activity</h2><a class="small" href="{% url 'dashboard:audit_log' %}">Audit log</a></div>
+      <div class="table-responsive"><table class="table table-dash"><tbody>
+        {% for a in recent_activity %}<tr><td class="text-nowrap">{{ a.created_at|date:"j M, H:i" }}</td><td>{{ a.actor|default:"System" }}</td><td>{{ a.get_action_display }}</td><td>{{ a.target_type }} {{ a.target_id }}</td><td class="text-meta">{{ a.description|truncatechars:80 }}</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Access denied | {{ site.brand_name }}{% endblock %}
+{% block content %}
+<div class="error-page"><div>
+  <div class="code" aria-hidden="true">403</div>
+  <h1 class="h2 mt-3">You don’t have access to this page</h1>
+  <p class="text-meta">If you think you should, ask an administrator to update your role.</p>
+  <a class="btn btn-primary" href="{% if user.is_staff %}{% url 'dashboard:home' %}{% else %}{% url 'core:home' %}{% endif %}">Go back</a>
+</div></div>
+{% endblock %}

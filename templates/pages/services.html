@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ page.seo_title|default:"Our services" }} | {{ site.brand_name }}{% endblock %}
+{% block meta_description %}{{ page.seo_description|default:"Property buying, selling, rental, leasing and commercial real estate services in Faridabad and Delhi NCR." }}{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li><li class="breadcrumb-item active" aria-current="page">Services</li></ol></nav>
+    <h1 class="mb-1">{{ page.title|default:"Our services" }}</h1>
+    <p class="text-meta mb-0">{{ page.intro|default:"How we can help you buy, sell, rent or lease property." }}</p>
+  </div>
+</div>
+<div class="container section-sm">
+  {% if page.body %}<div class="rich-text mb-4">{{ page.body|rich_text }}</div>{% endif %}
+  <div class="row g-3 g-lg-4">
+    {% for s in services %}
+    <div class="col-md-6"><section class="service-card" aria-labelledby="svc{{ s.pk }}">
+      <span class="feature-icon">{% icon s.icon 24 %}</span>
+      <h2 class="h5" id="svc{{ s.pk }}">{{ s.title }}</h2>
+      <p class="text-meta">{{ s.summary }}</p>
+      {% if s.body %}<div class="rich-text small">{{ s.body|rich_text }}</div>{% endif %}
+    </section></div>
+    {% endfor %}
+  </div>
+  <div class="cta-band mt-5"><div class="row align-items-center g-3"><div class="col-md-8"><h2 class="h4">Need help with a property?</h2><p class="text-meta mb-0">Tell us what you’re looking for and our team will get in touch.</p></div><div class="col-md-4 text-md-end"><a class="btn btn-primary btn-lg" href="{% url 'pages:contact' %}">Contact us</a></div></div></div>
+</div>
+{% endblock %}

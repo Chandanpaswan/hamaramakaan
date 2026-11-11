@@ -1,0 +1,6 @@
+{% load static %}<!doctype html>
+<html lang="en-IN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<title>Back soon | {{ site.brand_name }}</title>
+<link rel="icon" href="{% static 'images/brand/favicon.svg' %}" type="image/svg+xml">
+<style>body{font-family:Inter,Segoe UI,Arial,sans-serif;background:#0B1F4D;color:rgba(255,255,255,.85);display:grid;place-items:center;min-height:100vh;margin:0;padding:16px;text-align:center}h1{color:#fff;font-family:Poppins,Segoe UI,Arial,sans-serif}.t{color:#F2A93B}</style></head>
+<body><main><img src="{% static 'images/brand/logo-horizontal-white.svg' %}" alt="{{ site.brand_name }}" width="220" height="55"><h1>We’ll be back soon</h1><p>{{ site.maintenance_message }}</p>{% if site.phone %}<p>Need help now? Call <a style="color:#fff" href="tel:{{ site.phone_href }}">{{ site.phone }}</a></p>{% endif %}<p class="t">{{ site.tagline_hindi }}</p></main></body></html>

@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}{{ page.seo_title|default:"About us" }} | {{ site.brand_name }}{% endblock %}
+{% block meta_description %}{{ page.seo_description|default:page.intro }}{% endblock %}
+{% block content %}
+<section class="hero" style="padding:56px 0 64px" aria-labelledby="about-title">
+  <div class="container">
+    <nav aria-label="Breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a class="text-white-50" href="{% url 'core:home' %}">Home</a></li><li class="breadcrumb-item active text-white" aria-current="page">About us</li></ol></nav>
+    {% if site.tagline_hindi %}<p class="tagline" lang="hi">{{ site.tagline_hindi }}</p>{% endif %}
+    <h1 id="about-title" style="max-width:none">{{ page.title }}</h1>
+    {% if page.intro %}<p class="lead mt-2 mb-0">{{ page.intro }}</p>{% endif %}
+  </div>
+</section>
+<div class="container section">
+  <div class="row g-5">
+    <div class="col-lg-7"><div class="rich-text">{{ page.body|rich_text }}</div></div>
+    <div class="col-lg-5">
+      <div class="hm-card hm-card-body text-center bg-cream">
+        <img src="{% static 'images/brand/logo-seal.svg' %}" alt="{{ site.brand_name }} seal" width="180" height="180" class="mb-3" loading="lazy">
+        <p class="mb-1 fw-semibold text-ink">{{ site.tagline_english }}</p>
+        <p class="text-meta small mb-3">“Hamara Makaan” means “our home”.</p>
+        <a class="btn btn-primary" href="{% url 'pages:contact' %}">Talk to our team</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% if highlights %}
+<section class="section bg-white border-top"><div class="container"><h2 class="mb-4">What you can expect</h2><div class="row g-4">
+  {% for h in highlights %}<div class="col-md-6 col-lg-3"><div class="feature"><span class="feature-icon">{% icon h.icon 22 %}</span><div><h3>{{ h.title }}</h3><p>{{ h.text }}</p></div></div></div>{% endfor %}
+</div></div></section>
+{% endif %}
+{% if services %}
+<section class="section bg-cream"><div class="container"><div class="section-head"><h2 class="mb-0">How we help</h2><a class="btn btn-ghost" href="{% url 'pages:services' %}">All services</a></div><div class="row g-3">
+  {% for s in services %}<div class="col-md-6 col-lg-4"><div class="service-card"><span class="feature-icon">{% icon s.icon 24 %}</span><h3>{{ s.title }}</h3><p class="text-meta mb-0">{{ s.summary }}</p></div></div>{% endfor %}
+</div></div></section>
+{% endif %}
+{% endblock %}

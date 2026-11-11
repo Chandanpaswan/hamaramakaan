@@ -1,0 +1,27 @@
+<article class="property-card">
+  <div class="pc-media">
+    <div class="pc-badges">
+      {% if project.is_sample %}<span class="hm-badge hm-badge-sample">Sample</span>{% endif %}
+      <span class="hm-badge {% if project.status == 'new_launch' %}hm-badge-new{% else %}hm-badge-info{% endif %}">{{ project.get_status_display }}</span>
+      {% if project.rera_number %}<span class="hm-badge hm-badge-rera">RERA</span>{% endif %}
+    </div>
+    {% if project.cover_image %}
+      <img src="{{ project.cover_image.url }}" alt="{{ project.cover_image_alt|default:project.name }}" loading="lazy" decoding="async">
+      {% if project.is_artist_impression %}<span class="pc-count">Artist’s impression</span>{% endif %}
+    {% else %}
+      {% include "includes/placeholder_art.html" with kind="tower" uid=project.pk|stringformat:"dp" %}
+    {% endif %}
+  </div>
+  <div class="pc-body">
+    <div class="pc-price">{% if project.price_from %}{{ project.price_from|inr_short }}{% if project.price_to %} – {{ project.price_to|inr_short|cut:"₹ " }}{% endif %}{% else %}Price on request{% endif %}</div>
+    <h3 class="pc-title"><a href="{{ project.get_absolute_url }}">{{ project.name }}</a></h3>
+    <p class="pc-loc">{% icon "map-pin" 14 %} {{ project.location_label }}</p>
+    <div class="pc-facts">
+      {% if project.configurations %}<span>{% icon "apartment" 14 %} {{ project.configurations }}</span>{% endif %}
+      {% if project.possession_date %}<span>{% icon "calendar" 14 %} {{ project.possession_date|date:"M Y" }}</span>{% endif %}
+    </div>
+    <div class="pc-foot"><span>{% if project.builder_name %}By {{ project.builder_name }}{% endif %}</span>
+      <div class="pc-actions"><a class="btn btn-primary btn-sm" href="{{ project.get_absolute_url }}">View project</a></div>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,13 @@
+{% load static %}
+<article class="post-card">
+  <div class="post-media">
+    {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.featured_image_alt|default:post.title }}" loading="lazy" decoding="async">
+    {% else %}<img src="{% static 'images/brand/brand-icon.svg' %}" alt="" style="width:72px;height:72px;opacity:.5;object-fit:contain" loading="lazy">{% endif %}
+  </div>
+  <div class="post-body">
+    {% if post.category %}<span class="hm-badge hm-badge-info align-self-start">{{ post.category.name }}</span>{% endif %}
+    <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
+    {% if post.excerpt %}<p class="small text-meta mb-3">{{ post.excerpt|truncatechars:140 }}</p>{% endif %}
+    <p class="post-meta mt-auto mb-0">{{ post.published_at|date:"j M Y" }} · {{ post.reading_minutes }} min read</p>
+  </div>
+</article>

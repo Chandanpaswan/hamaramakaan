@@ -1,0 +1,45 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Properties{% endblock %}{% block heading %}Properties{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h1 class="h3 mb-0">Properties</h1>
+  {% if perms.properties.add_property %}<a class="btn btn-primary" href="{% url 'dashboard:property_create' %}">{% icon "plus" 18 %} Add property</a>{% endif %}
+</div>
+<div class="status-tabs">
+  <a class="chip {% if not current_status %}on{% endif %}" href="?">All</a>
+  {% for value, label, count in statuses %}<a class="chip {% if current_status == value %}on{% endif %}" href="?status={{ value }}">{{ label }} <span class="text-meta">{{ count }}</span></a>{% endfor %}
+</div>
+<form class="filter-bar mb-3" method="get" data-clean-get>
+  {% if current_status %}<input type="hidden" name="status" value="{{ current_status }}">{% endif %}
+  <label class="visually-hidden" for="pq">Search</label>
+  <input class="form-control" id="pq" type="search" name="q" value="{{ request.GET.q }}" placeholder="ID, title, locality, owner phone" style="min-width:260px">
+  <select class="form-select" name="purpose" aria-label="Purpose"><option value="">Any purpose</option>{% for v, l in purposes %}<option value="{{ v }}" {% if request.GET.purpose == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+  <select class="form-select" name="source" aria-label="Source"><option value="">Any source</option>{% for v, l in sources %}<option value="{{ v }}" {% if request.GET.source == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+  <button class="btn btn-secondary-hm" type="submit">Filter</button>
+</form>
+<div class="panel">
+  <div class="table-responsive">
+    <table class="table table-dash">
+      <thead><tr><th></th><th>ID</th><th>Title</th><th>Purpose</th><th>Price</th><th>Location</th><th>Status</th><th>Updated</th></tr></thead>
+      <tbody>
+      {% for p in page_obj %}
+        <tr>
+          <td>{% with img=p.primary_image %}{% if img %}<img class="thumb" src="{{ img.image.url }}" alt="">{% else %}<span class="thumb">{% include "includes/placeholder_art.html" with kind=p.property_type.illustration uid=p.pk %}</span>{% endif %}{% endwith %}</td>
+          <td class="text-nowrap">{{ p.listing_id }}</td>
+          <td><a class="fw-semibold" href="{% url 'dashboard:property_detail' p.pk %}">{{ p.title|truncatechars:50 }}</a>
+            <div class="small text-meta">{{ p.property_type }}{% if p.source == "owner" %} · <span class="hm-badge hm-badge-new">Owner</span>{% endif %}{% if p.is_featured %} · <span class="hm-badge hm-badge-featured">Featured</span>{% endif %}{% if p.is_sample %} · <span class="hm-badge hm-badge-sample">Sample</span>{% endif %}</div></td>
+          <td>{{ p.get_purpose_display }}</td>
+          <td class="text-nowrap">{% if p.price %}{{ p.price|inr_short }}{% else %}—{% endif %}</td>
+          <td>{{ p.location_label }}</td>
+          <td><span class="hm-badge {% if p.status == 'published' %}hm-badge-verified{% elif p.status == 'pending' %}hm-badge-featured{% elif p.status == 'rejected' %}hm-badge-error{% else %}hm-badge-muted{% endif %}">{{ p.get_status_display }}</span></td>
+          <td class="text-nowrap small">{{ p.updated_at|date:"j M Y" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="8" class="text-center text-meta py-4">No properties found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include "includes/pagination.html" %}
+{% endblock %}

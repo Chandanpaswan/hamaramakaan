@@ -1,0 +1,32 @@
+{% with img=p.primary_image %}
+<article class="property-card">
+  <div class="pc-media">
+    <div class="pc-badges">
+      {% if p.is_sample %}<span class="hm-badge hm-badge-sample">Sample</span>{% endif %}
+      {% if p.is_rental %}<span class="hm-badge hm-badge-rent">For {{ p.get_purpose_display|lower }}</span>{% else %}<span class="hm-badge hm-badge-sale">For sale</span>{% endif %}
+      {% if p.is_verified %}<span class="hm-badge hm-badge-verified">{% icon "badge-check" 12 %} Verified</span>{% elif p.is_featured and not p.is_sample %}<span class="hm-badge hm-badge-featured">Featured</span>{% endif %}
+    </div>
+    {% if img %}
+      <img src="{{ img.image.url }}" alt="{{ img.alt }}" loading="lazy" decoding="async" {% if img.width %}width="{{ img.width }}" height="{{ img.height }}"{% endif %}>
+      {% with n=p.images.all|length %}{% if n > 1 %}<span class="pc-count">{% icon "camera" 12 %} {{ n }}</span>{% endif %}{% endwith %}
+    {% else %}
+      {% include "includes/placeholder_art.html" with kind=p.property_type.illustration uid=p.pk label="Illustration – photos coming soon" %}
+    {% endif %}
+  </div>
+  <div class="pc-body">
+    <div class="pc-price">
+      {% if p.price %}{{ p.price|inr_short }}{% if p.is_rental %}<span class="pc-psf">/ month</span>{% elif p.price_per_unit %}<span class="pc-psf">₹ {{ p.price_per_unit|num }}/{{ p.get_area_unit_display }}</span>{% endif %}{% else %}Contact for price{% endif %}
+    </div>
+    <h3 class="pc-title"><a href="{{ p.get_absolute_url }}">{{ p.title }}</a></h3>
+    <p class="pc-loc">{% icon "map-pin" 14 %} {{ p.location_label }}</p>
+    <div class="pc-facts">{% for icon_name, text in p.key_facts %}<span>{% icon icon_name 14 %} {{ text }}</span>{% endfor %}</div>
+    <div class="pc-foot">
+      <span class="text-truncate">{% if p.published_at %}Posted {{ p.published_at|ago }}{% else %}{{ p.property_type.name }}{% endif %}</span>
+      <div class="pc-actions">
+        {% if site.whatsapp_digits %}<a class="btn btn-wa btn-sm icon-btn" href="{% url 'leads:whatsapp' %}?property={{ p.listing_id }}" rel="nofollow" aria-label="WhatsApp about {{ p.title }}">{% icon "message-circle" 16 %}</a>{% endif %}
+        <a class="btn btn-primary btn-sm" href="{{ p.get_absolute_url }}#enquire" aria-label="Enquire about {{ p.title }}">Enquire</a>
+      </div>
+    </div>
+  </div>
+</article>
+{% endwith %}

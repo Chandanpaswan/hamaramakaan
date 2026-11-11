@@ -1,0 +1,57 @@
+{% load static %}
+<footer class="site-footer">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <img class="footer-logo mb-3" src="{% static 'images/brand/logo-horizontal-white.svg' %}" alt="{{ site.brand_name }}" width="185" height="46" loading="lazy">
+        {% if site.tagline_hindi %}<p class="tagline mb-2">{{ site.tagline_hindi }}</p>{% endif %}
+        <p class="mb-3">{{ site.footer_about }}</p>
+        {% if site.address %}<p class="d-flex gap-2 mb-2">{% icon "map-pin" 18 %}<span>{{ site.address|linebreaksbr }}</span></p>{% endif %}
+        {% if site.phone %}<p class="d-flex gap-2 mb-2">{% icon "phone" 18 %}<a href="tel:{{ site.phone_href }}">{{ site.phone }}</a></p>{% endif %}
+        {% if site.email %}<p class="d-flex gap-2 mb-2">{% icon "message-circle" 18 %}<a href="mailto:{{ site.email }}">{{ site.email }}</a></p>{% endif %}
+        {% if site.office_hours %}<p class="d-flex gap-2 mb-0">{% icon "calendar" 18 %}<span>{{ site.office_hours }}</span></p>{% endif %}
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <h2>Properties</h2>
+        <ul>
+          <li><a href="{% url 'properties:buy' %}">Buy</a></li>
+          <li><a href="{% url 'properties:rent' %}">Rent</a></li>
+          <li><a href="{% url 'properties:commercial' %}">Commercial</a></li>
+          <li><a href="{% url 'properties:projects' %}">New projects</a></li>
+          <li><a href="{% url 'properties:post_property' %}">Post property</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <h2>Company</h2>
+        <ul>
+          <li><a href="{% url 'pages:about' %}">About us</a></li>
+          <li><a href="{% url 'pages:services' %}">Services</a></li>
+          <li><a href="{% url 'blog:list' %}">Blog</a></li>
+          <li><a href="{% url 'pages:faq' %}">FAQs</a></li>
+          <li><a href="{% url 'pages:contact' %}">Contact</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <h2>Policies</h2>
+        <ul>
+          {% for p in footer_pages %}<li><a href="{{ p.get_absolute_url }}">{{ p.title }}</a></li>{% endfor %}
+          <li><a href="{% url 'django.contrib.sitemaps.views.sitemap' %}">Sitemap</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        {% if footer_cities %}
+        <h2>Locations</h2>
+        <ul>{% for c in footer_cities %}<li><a href="{{ c.get_absolute_url }}">Property in {{ c.name }}</a></li>{% endfor %}</ul>
+        {% endif %}
+        {% if site.social_links %}
+        <h2 class="mt-4">Follow us</h2>
+        <ul>{% for label, url in site.social_links %}<li><a href="{{ url }}" rel="noopener" target="_blank">{{ label }}</a></li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© {% now "Y" %} {{ site.brand_name }}. All rights reserved.</span>
+      <span>Listings are indicative – please verify all details before any transaction. <a href="{% url 'pages:disclaimer' %}">Disclaimer</a></span>
+    </div>
+  </div>
+</footer>

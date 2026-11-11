@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Post your property for sale or rent | {{ site.brand_name }}{% endblock %}
+{% block meta_description %}List your flat, house, plot or commercial property for sale or rent. Our team reviews every listing before it goes live.{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li><li class="breadcrumb-item active" aria-current="page">Post property</li></ol></nav>
+    <h1 class="mb-1">Post your property</h1>
+    <p class="text-meta mb-0">Share the details below. Our team reviews every submission and contacts you before anything is published.</p>
+  </div>
+</div>
+<div class="container section-sm">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      {% if form.non_field_errors %}<div class="alert alert-danger">{% for e in form.non_field_errors %}{{ e }} {% endfor %}</div>{% endif %}
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {% include "includes/field.html" with field=form.website %}
+        <section class="form-step" aria-labelledby="step1">
+          <div class="form-step-head"><span class="form-step-num">1</span><h2 id="step1">Your details</h2></div>
+          <div class="row g-3">
+            <div class="col-md-6">{% include "includes/field.html" with field=form.owner_name wrapper_class="mb-0" %}</div>
+            <div class="col-md-6">{% include "includes/field.html" with field=form.owner_phone wrapper_class="mb-0" %}</div>
+            <div class="col-md-6">{% include "includes/field.html" with field=form.owner_email wrapper_class="mb-0" %}</div>
+          </div>
+          <p class="form-text mt-2 mb-0">Your phone number and email are never shown publicly.</p>
+        </section>
+        <section class="form-step" aria-labelledby="step2">
+          <div class="form-step-head"><span class="form-step-num">2</span><h2 id="step2">Property basics</h2></div>
+          {% include "includes/field.html" with field=form.purpose %}
+          <div class="row g-3">
+            <div class="col-md-6">{% include "includes/field.html" with field=form.property_type wrapper_class="mb-0" %}</div>
+            <div class="col-md-6">{% include "includes/field.html" with field=form.city wrapper_class="mb-0" %}</div>
+            <div class="col-md-6">{% include "includes/field.html" with field=form.locality wrapper_class="mb-0" %}</div>
+            <div class="col-md-6">{% include "includes/field.html" with field=form.project_name wrapper_class="mb-0" %}</div>
+            <div class="col-12">{% include "includes/field.html" with field=form.address wrapper_class="mb-0" %}</div>
+          </div>
+        </section>
+        <section class="form-step" aria-labelledby="step3">
+          <div class="form-step-head"><span class="form-step-num">3</span><h2 id="step3">Price &amp; specifications</h2></div>
+          <div class="row g-3">
+            <div class="col-md-6">{% include "includes/field.html" with field=form.price wrapper_class="mb-0" %}</div>
+            <div class="col-7 col-md-4">{% include "includes/field.html" with field=form.area wrapper_class="mb-0" %}</div>
+            <div class="col-5 col-md-2">{% include "includes/field.html" with field=form.area_unit wrapper_class="mb-0" %}</div>
+            <div class="col-6 col-md-3">{% include "includes/field.html" with field=form.bedrooms wrapper_class="mb-0" %}</div>
+            <div class="col-6 col-md-3">{% include "includes/field.html" with field=form.bathrooms wrapper_class="mb-0" %}</div>
+            <div class="col-6 col-md-3">{% include "includes/field.html" with field=form.floor_number wrapper_class="mb-0" %}</div>
+            <div class="col-6 col-md-3">{% include "includes/field.html" with field=form.total_floors wrapper_class="mb-0" %}</div>
+            <div class="col-md-6">{% include "includes/field.html" with field=form.furnishing wrapper_class="mb-0" %}</div>
+            <div class="col-md-6">{% include "includes/field.html" with field=form.construction_status wrapper_class="mb-0" %}</div>
+            <div class="col-12">{% include "includes/field.html" with field=form.title wrapper_class="mb-0" %}</div>
+            <div class="col-12">{% include "includes/field.html" with field=form.description wrapper_class="mb-0" %}</div>
+          </div>
+        </section>
+        <section class="form-step" aria-labelledby="step4">
+          <div class="form-step-head"><span class="form-step-num">4</span><h2 id="step4">Photos &amp; confirmation</h2></div>
+          <div class="dropzone mb-3">
+            <span class="d-block mb-2 text-blue">{% icon "upload" 28 %}</span>
+            <label class="form-label" for="{{ form.photos.id_for_label }}">{{ form.photos.label }}</label>
+            {{ form.photos }}
+            <div class="form-text">{{ form.photos.help_text }} Daylight photos work best. Please don’t add watermarks.</div>
+            {% for e in form.photos.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+            <div class="photo-previews" data-photo-previews></div>
+          </div>
+          {% include "includes/field.html" with field=form.authorised %}
+          {% include "includes/field.html" with field=form.consent %}
+          <button type="submit" class="btn btn-post btn-lg w-100">{% icon "plus" 18 %} Submit property for review</button>
+        </section>
+      </form>
+    </div>
+    <div class="col-lg-4">
+      <aside class="hm-card hm-card-body contact-card">
+        <h2 class="h5">What happens next?</h2>
+        <ol class="small ps-3 mb-3">
+          <li class="mb-2">You receive a reference number straight away.</li>
+          <li class="mb-2">Our team reviews your details and photos, and may call you to confirm them.</li>
+          <li class="mb-2">Once approved, your listing goes live on the website.</li>
+          <li>Enquiries come to our team, who coordinate with you.</li>
+        </ol>
+        <div class="safe-tip">{% icon "shield-check" 18 %}<span>Your full address and contact details stay private.</span></div>
+      </aside>
+    </div>
+  </div>
+</div>
+{% locality_city_map as lcm %}{{ lcm|json_script:"locality-cities" }}
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}{{ meta.title }}{% if page_obj.number > 1 %} – page {{ page_obj.number }}{% endif %} | {{ site.brand_name }}{% endblock %}
+{% block meta_description %}{{ meta.title }}. {{ meta.intro }} Browse listings reviewed by {{ site.brand_name }}.{% endblock %}
+{% block canonical %}{{ request.scheme }}://{{ request.get_host }}{{ canonical_path }}{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+      {% if city %}<li class="breadcrumb-item"><a href="{% url meta.url %}">{{ meta.base_title }}</a></li>{% endif %}
+      <li class="breadcrumb-item active" aria-current="page">{% if city %}{{ city.name }}{% else %}{{ meta.title }}{% endif %}</li>
+    </ol></nav>
+    <h1 class="mb-1">{{ meta.title }}</h1>
+    <p class="text-meta mb-0">{{ meta.intro }}</p>
+    {% if section_cities and not city %}
+    <div class="d-flex flex-wrap gap-2 mt-3">{% for c in section_cities %}<a class="chip" href="{% url meta.url|add:'_city' c.slug %}">{{ c.name }}</a>{% endfor %}</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="container section-sm">
+  <div class="row g-4">
+    <aside class="col-lg-3">
+      <div class="offcanvas-lg offcanvas-start" tabindex="-1" id="filters" aria-labelledby="filtersLabel">
+        <div class="offcanvas-header border-bottom">
+          <h2 class="offcanvas-title h5 mb-0" id="filtersLabel">Filters</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#filters" aria-label="Close filters"></button>
+        </div>
+        <div class="offcanvas-body p-lg-0">
+          <form class="filter-panel w-100" method="get" action="{{ base_url }}" data-clean-get aria-label="Filter properties">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <h2 class="h6 mb-0 d-none d-lg-block">Filters{% if filter_count %} <span class="hm-badge hm-badge-info ms-1">{{ filter_count }}</span>{% endif %}</h2>
+              {% if filter_count %}<a class="small" href="{{ base_url }}">Clear all</a>{% endif %}
+            </div>
+            {% if form.sort.value %}<input type="hidden" name="sort" value="{{ form.sort.value }}">{% endif %}
+            <div class="filter-group">{% include "includes/field.html" with field=form.q wrapper_class="mb-0" %}</div>
+            <div class="filter-group">
+              {% if section == "all" or section == "commercial" %}{% include "includes/field.html" with field=form.purpose wrapper_class="mb-2" %}{% endif %}
+              {% if section != "commercial" %}{% include "includes/field.html" with field=form.category wrapper_class="mb-2" %}{% endif %}
+              {% if not city %}{% include "includes/field.html" with field=form.city wrapper_class="mb-2" %}{% endif %}
+              {% include "includes/field.html" with field=form.locality wrapper_class="mb-2" %}
+              {% include "includes/field.html" with field=form.type wrapper_class="mb-0" %}
+            </div>
+            <div class="filter-group">
+              <span class="form-label d-block">Budget (₹){% if section == "rent" %} per month{% endif %}</span>
+              <div class="row g-2">
+                <div class="col-6"><label class="visually-hidden" for="{{ form.min_price.id_for_label }}">Minimum budget</label>{{ form.min_price }}</div>
+                <div class="col-6"><label class="visually-hidden" for="{{ form.max_price.id_for_label }}">Maximum budget</label>{{ form.max_price }}</div>
+              </div>
+              {% for e in form.max_price.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="filter-group">{% include "includes/field.html" with field=form.bhk wrapper_class="mb-2" %}{% include "includes/field.html" with field=form.baths wrapper_class="mb-0" %}</div>
+            <details class="filter-group" {% if form.min_area.value or form.max_area.value or form.furnishing.value or form.construction.value or form.amenities.value or form.posted.value or form.condition.value or form.possession_by.value %}open{% endif %}>
+              <summary class="form-label mb-0" style="cursor:pointer">More filters</summary>
+              <div class="pt-3">
+                <span class="form-label d-block">Area</span>
+                <div class="row g-2 mb-2">
+                  <div class="col-4"><label class="visually-hidden" for="{{ form.min_area.id_for_label }}">Min area</label>{{ form.min_area }}</div>
+                  <div class="col-4"><label class="visually-hidden" for="{{ form.max_area.id_for_label }}">Max area</label>{{ form.max_area }}</div>
+                  <div class="col-4"><label class="visually-hidden" for="{{ form.area_unit.id_for_label }}">Area unit</label>{{ form.area_unit }}</div>
+                </div>
+                {% for e in form.max_area.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+                {% include "includes/field.html" with field=form.furnishing wrapper_class="mb-2" %}
+                {% include "includes/field.html" with field=form.construction wrapper_class="mb-2" %}
+                {% include "includes/field.html" with field=form.condition wrapper_class="mb-2" %}
+                {% include "includes/field.html" with field=form.possession_by wrapper_class="mb-2" %}
+                {% include "includes/field.html" with field=form.posted wrapper_class="mb-2" %}
+                {% include "includes/field.html" with field=form.amenities wrapper_class="mb-2" %}
+                {% include "includes/field.html" with field=form.parking wrapper_class="mb-1" %}
+                {% include "includes/field.html" with field=form.verified wrapper_class="mb-0" %}
+              </div>
+            </details>
+            <button type="submit" class="btn btn-primary w-100 mt-2">{% icon "search" 18 %} Apply filters</button>
+          </form>
+        </div>
+      </div>
+    </aside>
+
+    <div class="col-lg-9">
+      <div class="results-bar">
+        <p class="mb-0 text-meta" aria-live="polite"><strong class="text-ink">{{ page_obj.paginator.count }}</strong> propert{{ page_obj.paginator.count|pluralize:"y,ies" }} found</p>
+        <div class="d-flex gap-2 align-items-center">
+          <button class="btn btn-secondary-hm btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#filters" aria-controls="filters">{% icon "sliders-horizontal" 16 %} Filters{% if filter_count %} ({{ filter_count }}){% endif %}</button>
+          <form method="get" action="{{ base_url }}" class="d-flex align-items-center gap-2">
+            {% for key, values in request.GET.lists %}{% if key != "sort" and key != "page" %}{% for v in values %}<input type="hidden" name="{{ key }}" value="{{ v }}">{% endfor %}{% endif %}{% endfor %}
+            <label class="small text-meta text-nowrap" for="sort-select">Sort by</label>
+            <select class="form-select form-select-sm" id="sort-select" name="sort" data-autosubmit>
+              {% for value, label in form.fields.sort.choices %}<option value="{{ value }}" {% if form.sort.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+            <noscript><button class="btn btn-sm btn-secondary-hm" type="submit">Sort</button></noscript>
+          </form>
+        </div>
+      </div>
+
+      {% if form.errors %}<div class="alert alert-warning">Some filters were not valid and have been ignored.</div>{% endif %}
+
+      {% if properties %}
+        <div class="row g-3 g-lg-4">{% for p in properties %}<div class="col-sm-6 col-xl-4">{% include "includes/property_card.html" %}</div>{% endfor %}</div>
+        {% include "includes/pagination.html" %}
+      {% else %}
+        <div class="empty-state">
+          <span class="empty-icon">{% icon "search" 28 %}</span>
+          <h2 class="h5">No properties match your search</h2>
+          <p class="text-meta">Try removing a filter or widening your budget. Or tell us what you need and we’ll look for you.</p>
+          <div class="d-flex gap-2 justify-content-center flex-wrap">
+            {% if filter_count %}<a class="btn btn-secondary-hm" href="{{ base_url }}">Clear filters</a>{% endif %}
+            <a class="btn btn-primary" href="{% url 'pages:contact' %}?requirement={% if section == 'rent' %}rent{% else %}buy{% endif %}">Share your requirement</a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% locality_city_map as lcm %}{{ lcm|json_script:"locality-cities" }}
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Contact us | {{ site.brand_name }}{% endblock %}
+{% block meta_description %}Contact {{ site.brand_name }} to buy, sell or rent property in Faridabad and Delhi NCR. Send an enquiry or request a callback.{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li><li class="breadcrumb-item active" aria-current="page">Contact us</li></ol></nav>
+    <h1 class="mb-1">Contact us</h1>
+    <p class="text-meta mb-0">Tell us what you need – our team usually responds within one working day.</p>
+  </div>
+</div>
+<div class="container section-sm">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="hm-card hm-card-body">
+        <h2 class="h5 mb-3">Send us a message</h2>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% include "includes/field.html" with field=form.website %}
+          <div class="row g-3">
+            <div class="col-md-6">{% include "includes/field.html" with field=form.name wrapper_class="mb-0" %}</div>
+            <div class="col-md-6">{% include "includes/field.html" with field=form.phone wrapper_class="mb-0" %}</div>
+            <div class="col-md-6">{% include "includes/field.html" with field=form.email wrapper_class="mb-0" %}</div>
+            <div class="col-md-6">{% include "includes/field.html" with field=form.requirement wrapper_class="mb-0" %}</div>
+            <div class="col-md-6">{% include "includes/field.html" with field=form.preferred_location wrapper_class="mb-0" %}</div>
+            <div class="col-md-6">{% include "includes/field.html" with field=form.preferred_contact_method wrapper_class="mb-0" %}</div>
+            <div class="col-12">{% include "includes/field.html" with field=form.message wrapper_class="mb-0" %}</div>
+            <div class="col-12">{% include "includes/field.html" with field=form.consent wrapper_class="mb-0" %}</div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg mt-3">Send message</button>
+          <p class="form-text mt-2 mb-0">See our <a href="{% url 'pages:privacy' %}">Privacy Policy</a> for how we use your details.</p>
+        </form>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="hm-card hm-card-body mb-4">
+        <h2 class="h5 mb-3">Reach us directly</h2>
+        {% if site.phone or site.whatsapp_digits or site.email or site.address %}
+        <ul class="list-unstyled d-grid gap-3 mb-0">
+          {% if site.phone %}<li class="d-flex gap-3"><span class="feature-icon" style="width:40px;height:40px;border-radius:10px;background:var(--hm-mist);color:var(--hm-blue);display:grid;place-items:center">{% icon "phone" 18 %}</span><div><small class="text-meta d-block">Phone</small><a class="fw-semibold" href="tel:{{ site.phone_href }}">{{ site.phone }}</a></div></li>{% endif %}
+          {% if site.whatsapp_digits %}<li class="d-flex gap-3"><span class="feature-icon" style="width:40px;height:40px;border-radius:10px;background:var(--hm-success-tint);color:var(--hm-success);display:grid;place-items:center">{% icon "message-circle" 18 %}</span><div><small class="text-meta d-block">WhatsApp</small><a class="fw-semibold" href="{% url 'leads:whatsapp' %}" rel="nofollow">{{ site.whatsapp_number }}</a></div></li>{% endif %}
+          {% if site.email %}<li class="d-flex gap-3"><span class="feature-icon" style="width:40px;height:40px;border-radius:10px;background:var(--hm-mist);color:var(--hm-blue);display:grid;place-items:center">{% icon "message-circle" 18 %}</span><div><small class="text-meta d-block">Email</small><a class="fw-semibold" href="mailto:{{ site.email }}">{{ site.email }}</a></div></li>{% endif %}
+          {% if site.address %}<li class="d-flex gap-3"><span class="feature-icon" style="width:40px;height:40px;border-radius:10px;background:var(--hm-mist);color:var(--hm-blue);display:grid;place-items:center">{% icon "map-pin" 18 %}</span><div><small class="text-meta d-block">Office</small><span class="text-ink">{{ site.address|linebreaksbr }}</span></div></li>{% endif %}
+          {% if site.office_hours %}<li class="d-flex gap-3"><span class="feature-icon" style="width:40px;height:40px;border-radius:10px;background:var(--hm-mist);color:var(--hm-blue);display:grid;place-items:center">{% icon "calendar" 18 %}</span><div><small class="text-meta d-block">Office hours</small><span class="text-ink">{{ site.office_hours }}</span></div></li>{% endif %}
+        </ul>
+        {% else %}
+        <p class="text-meta mb-0">Please use the form and our team will get in touch with you.</p>
+        {% endif %}
+      </div>
+      {% if site.map_embed_url %}
+      <div class="ratio ratio-4x3 rounded-4 overflow-hidden hm-card"><iframe src="{{ site.map_embed_url }}" title="Map showing the {{ site.brand_name }} office" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

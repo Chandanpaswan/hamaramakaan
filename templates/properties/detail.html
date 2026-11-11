@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}{{ property.seo_title|default:property.title }}{% if not property.seo_title %} in {{ property.location_label }}{% endif %} | {{ site.brand_name }}{% endblock %}
+{% block meta_description %}{% if property.seo_description %}{{ property.seo_description }}{% else %}{{ property.title }} for {{ property.get_purpose_display|lower }} in {{ property.location_label }}{% if property.price %} at {{ property.price|inr_short }}{% endif %}. {{ property.area|num }} {{ property.get_area_unit_display }}. Listing ID {{ property.listing_id }}.{% endif %}{% endblock %}
+{% block og_title %}{{ property.title }} – {{ property.location_label }}{% endblock %}
+{% block og_image %}{% with img=images.0 %}{% if img %}{{ request.scheme }}://{{ request.get_host }}{{ img.image.url }}{% else %}{{ block.super }}{% endif %}{% endwith %}{% endblock %}
+{% block body_class %}has-mobile-cta{% endblock %}
+
+{% block content %}
+{% if preview %}<div class="preview-banner"><div class="container">Preview – this listing is “{{ property.get_status_display }}” and not visible to the public. <a href="{% url 'dashboard:property_detail' property.pk %}">Back to dashboard</a></div></div>{% endif %}
+<div class="container pt-3 pb-5">
+  {% include "includes/breadcrumbs.html" %}
+
+  {% with n=images|length %}
+  <div class="gallery {% if n <= 1 %}single{% endif %}">
+    {% if n %}
+      {% for img in images|slice:":3" %}
+      <button type="button" class="g-item {% if forloop.first %}g-main{% else %}g-side{% endif %}" data-gallery-index="{{ forloop.counter0 }}" aria-label="Open photo {{ forloop.counter }} of {{ n }}">
+        {% if forloop.first %}<span class="g-badges">{% if property.rera_number %}<span class="hm-badge hm-badge-rera">RERA registered</span>{% endif %}{% if property.is_verified %}<span class="hm-badge hm-badge-verified">Verified</span>{% endif %}</span>{% endif %}
+        <img src="{{ img.image.url }}" alt="{{ img.alt }}" {% if img.width %}width="{{ img.width }}" height="{{ img.height }}"{% endif %} {% if not forloop.first %}loading="lazy"{% endif %} decoding="async">
+        {% if forloop.counter == 3 and n > 3 %}<span class="g-more">+{{ n|add:"-3" }} photos</span>{% endif %}
+      </button>
+      {% endfor %}
+    {% else %}
+      <div class="g-item g-main">
+        <span class="g-badges">{% if property.is_sample %}<span class="hm-badge hm-badge-sample">Sample listing</span>{% endif %}{% if property.rera_number %}<span class="hm-badge hm-badge-rera">RERA registered</span>{% endif %}</span>
+        {% include "includes/placeholder_art.html" with kind=property.property_type.illustration uid="main" label="Illustration – photos coming soon" %}
+      </div>
+    {% endif %}
+  </div>
+  {% endwith %}
+
+  <div class="row g-4 mt-1">
+    <div class="col-lg-8">
+      <div class="d-flex flex-wrap justify-content-between gap-3 align-items-start mb-3">
+        <div>
+          <div class="d-flex gap-2 mb-2 flex-wrap">
+            {% if property.is_rental %}<span class="hm-badge hm-badge-rent">For {{ property.get_purpose_display|lower }}</span>{% else %}<span class="hm-badge hm-badge-sale">For sale</span>{% endif %}
+            <span class="hm-badge hm-badge-muted">{{ property.property_type.name }}</span>
+            {% if property.is_sample %}<span class="hm-badge hm-badge-sample">Sample</span>{% endif %}
+          </div>
+          <h1 class="mb-1">{{ property.title }}</h1>
+          <p class="text-meta mb-0 d-flex gap-1 align-items-center">{% icon "map-pin" 16 %} {% if property.show_address and property.address %}{{ property.address }}{% else %}{% if property.project_name %}{{ property.project_name }}, {% endif %}{{ property.location_label }}{% endif %}</p>
+          <p class="small text-meta mb-0 mt-1">Listing ID: <strong class="text-ink">{{ property.listing_id }}</strong>{% if property.published_at %} · Posted {{ property.published_at|ago }}{% endif %}</p>
+        </div>
+        <div class="text-lg-end">
+          <div class="detail-price">{% if property.price %}{{ property.price|inr_short }}{% if property.is_rental %}<small class="fs-6 fw-normal text-meta"> / month</small>{% endif %}{% else %}Contact for price{% endif %}</div>
+          <p class="small text-meta mb-0">
+            {% if property.price %}{{ property.price|inr }}{% endif %}
+            {% if property.price_per_unit %} · ₹ {{ property.price_per_unit|num }}/{{ property.get_area_unit_display }}{% endif %}
+          </p>
+          {% if property.price_note %}<p class="small text-meta mb-0">{{ property.price_note }}</p>{% endif %}
+        </div>
+      </div>
+
+      <section class="hm-card hm-card-body mb-4" aria-labelledby="facts-title">
+        <h2 id="facts-title" class="visually-hidden">Key details</h2>
+        <div class="fact-grid">
+          {% if property.bedrooms %}<div class="fact"><small>Configuration</small><strong>{{ property.bhk_label }}{% if property.bathrooms %} · {{ property.bathrooms }} Bath{{ property.bathrooms|pluralize }}{% endif %}</strong></div>{% endif %}
+          <div class="fact"><small>Area</small><strong>{{ property.area|num }} {{ property.get_area_unit_display }}</strong></div>
+          {% if property.carpet_area %}<div class="fact"><small>Carpet area</small><strong>{{ property.carpet_area|num }} {{ property.get_area_unit_display }}</strong></div>{% endif %}
+          {% if property.construction_status %}<div class="fact"><small>Status</small><strong>{{ property.get_construction_status_display }}</strong></div>{% endif %}
+          {% if property.floor_label %}<div class="fact"><small>Floor</small><strong>{{ property.floor_label }}</strong></div>{% endif %}
+          {% if property.furnishing %}<div class="fact"><small>Furnishing</small><strong>{{ property.get_furnishing_display }}</strong></div>{% endif %}
+          {% if property.facing %}<div class="fact"><small>Facing</small><strong>{{ property.get_facing_display }}</strong></div>{% endif %}
+          {% if property.parking %}<div class="fact"><small>Parking</small><strong>{{ property.parking }}</strong></div>{% endif %}
+          {% if property.balconies %}<div class="fact"><small>Balconies</small><strong>{{ property.balconies }}</strong></div>{% endif %}
+          {% if property.condition %}<div class="fact"><small>Condition</small><strong>{{ property.get_condition_display }}</strong></div>{% endif %}
+          {% if property.possession_date %}<div class="fact"><small>Possession</small><strong>{{ property.possession_date|date:"M Y" }}</strong></div>{% endif %}
+          {% if property.available_from %}<div class="fact"><small>Available from</small><strong>{{ property.available_from|date:"j M Y" }}</strong></div>{% endif %}
+          {% if property.security_deposit %}<div class="fact"><small>Security deposit</small><strong>{{ property.security_deposit|inr }}</strong></div>{% endif %}
+          {% if property.maintenance_charges %}<div class="fact"><small>Maintenance</small><strong>{{ property.maintenance_charges|inr }}/mo</strong></div>{% endif %}
+          {% if property.rera_number %}<div class="fact"><small>RERA ID</small><strong>{{ property.rera_number }}</strong></div>{% endif %}
+        </div>
+      </section>
+
+      {% if property.description %}
+      <section class="hm-card hm-card-body mb-4" aria-labelledby="about-title">
+        <h2 id="about-title" class="h4">About this property</h2>
+        <div class="rich-text">{{ property.description|linebreaks }}</div>
+      </section>
+      {% endif %}
+
+      {% if property.amenities.all %}
+      <section class="hm-card hm-card-body mb-4" aria-labelledby="amenities-title">
+        <h2 id="amenities-title" class="h4 mb-3">Amenities</h2>
+        <ul class="amenity-list">{% for a in property.amenities.all %}<li>{% icon a.icon 20 %} {{ a.name }}</li>{% endfor %}</ul>
+      </section>
+      {% endif %}
+
+      {% if property.landmarks_list or property.show_map %}
+      <section class="hm-card hm-card-body mb-4" aria-labelledby="location-title">
+        <h2 id="location-title" class="h4 mb-3">Location</h2>
+        {% if property.landmarks_list %}<ul class="amenity-list mb-3">{% for l in property.landmarks_list %}<li>{% icon "map-pin" 18 %} {{ l }}</li>{% endfor %}</ul>{% endif %}
+        {% if property.show_map and property.latitude and property.longitude %}
+          <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
+            <iframe src="https://maps.google.com/maps?q={{ property.latitude }},{{ property.longitude }}&z=15&output=embed" title="Approximate location of {{ property.title }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+          <p class="form-text">Map location is approximate.</p>
+        {% endif %}
+      </section>
+      {% endif %}
+
+      {% if not property.is_rental and property.price %}
+      <section class="hm-card hm-card-body mb-4" aria-labelledby="emi-title">
+        <h2 id="emi-title" class="h4 mb-3">{% icon "calculator" 22 %} EMI calculator</h2>
+        <div class="emi-box" data-emi>
+          <div class="row g-3">
+            <div class="col-md-4"><label class="form-label" for="emi_amount">Loan amount (₹)</label><input class="form-control" id="emi_amount" name="emi_amount" type="number" min="0" step="10000" value="{% widthratio property.price 10 8 %}"></div>
+            <div class="col-6 col-md-4"><label class="form-label" for="emi_rate">Interest rate (% p.a.)</label><input class="form-control" id="emi_rate" name="emi_rate" type="number" min="0" max="30" step="0.05" value="8.5"></div>
+            <div class="col-6 col-md-4"><label class="form-label" for="emi_years">Tenure (years)</label><input class="form-control" id="emi_years" name="emi_years" type="number" min="1" max="30" value="20"></div>
+          </div>
+          <p class="mt-3 mb-0">Estimated EMI: <span class="emi-result" data-emi-result aria-live="polite">—</span></p>
+          <p class="form-text mb-0">Indicative only, assuming an 80% loan. Actual rates and eligibility depend on your lender.</p>
+        </div>
+      </section>
+      {% endif %}
+
+      <p class="small text-meta"><strong>Disclaimer:</strong> Details are provided by the owner/our team and are indicative. Please verify the price, area, title documents and approvals independently before making any payment. <a href="{% url 'pages:disclaimer' %}">Read full disclaimer</a>.</p>
+    </div>
+
+    <div class="col-lg-4">
+      <aside class="hm-card hm-card-body contact-card" id="enquire" aria-labelledby="enquire-title">
+        <h2 id="enquire-title" class="h5 mb-1">Interested in this property?</h2>
+        <p class="small text-meta">Our team will get back to you with details and visit options.</p>
+        <div class="d-grid gap-2 mb-3">
+          {% if site.phone %}<a class="btn btn-primary" href="tel:{{ site.phone_href }}">{% icon "phone" 18 %} Call {{ site.phone }}</a>{% endif %}
+          {% if site.whatsapp_digits %}<a class="btn btn-wa" href="{% url 'leads:whatsapp' %}?property={{ property.listing_id }}" rel="nofollow">{% icon "message-circle" 18 %} WhatsApp</a>{% endif %}
+        </div>
+        {% include "includes/enquiry_form.html" with submit_label="Request details / site visit" %}
+        <div class="safe-tip mt-3">{% icon "shield-check" 18 %}<span><strong>Safe-deal tip:</strong> verify the RERA ID and title documents before paying any token amount.</span></div>
+      </aside>
+    </div>
+  </div>
+
+  {% if related %}
+  <section class="mt-5" aria-labelledby="related-title">
+    <h2 id="related-title" class="mb-3">Similar properties in {{ property.city.name }}</h2>
+    <div class="row g-3 g-lg-4">{% for p in related %}<div class="col-sm-6 col-lg-3">{% include "includes/property_card.html" %}</div>{% endfor %}</div>
+  </section>
+  {% endif %}
+</div>
+
+<div class="mobile-cta">
+  {% if site.whatsapp_digits %}<a class="btn btn-wa" href="{% url 'leads:whatsapp' %}?property={{ property.listing_id }}" rel="nofollow">{% icon "message-circle" 18 %} WhatsApp</a>{% endif %}
+  <a class="btn btn-primary" href="#enquire">{% icon "phone" 18 %} Enquire</a>
+</div>
+
+{% if images %}
+<div class="modal fade" id="galleryModal" tabindex="-1" aria-label="Photo gallery" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content bg-dark border-0">
+      <div class="modal-header border-0"><button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close gallery"></button></div>
+      <div class="modal-body p-0">
+        <div id="galleryCarousel" class="carousel slide">
+          <div class="carousel-inner">
+            {% for img in images %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+              <img src="{{ img.image.url }}" class="d-block w-100" style="max-height:78vh;object-fit:contain" alt="{{ img.alt }}" loading="lazy">
+              {% if img.caption %}<div class="carousel-caption"><p class="mb-0">{{ img.caption }}</p></div>{% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% if images|length > 1 %}
+          <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Previous photo</span></button>
+          <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel" data-bs-slide="next"><span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Next photo</span></button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

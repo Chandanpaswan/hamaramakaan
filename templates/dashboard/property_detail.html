@@ -1,0 +1,118 @@
+{% extends "dashboard/base.html" %}
+{% block title %}{{ property.listing_id }}{% endblock %}{% block heading %}Properties{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+  <div>
+    <a class="small" href="{% url 'dashboard:property_list' %}">← All properties</a>
+    <h1 class="h3 mb-1 mt-1">{{ property.title }}</h1>
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+      <span class="text-meta">{{ property.listing_id }}</span>
+      <span class="hm-badge {% if property.status == 'published' %}hm-badge-verified{% elif property.status == 'pending' %}hm-badge-featured{% elif property.status == 'rejected' %}hm-badge-error{% else %}hm-badge-muted{% endif %}">{{ property.get_status_display }}</span>
+      {% if property.source == "owner" %}<span class="hm-badge hm-badge-new">Owner submission</span>{% endif %}
+      {% if property.is_verified %}<span class="hm-badge hm-badge-verified">Verified</span>{% endif %}
+      {% if property.is_featured %}<span class="hm-badge hm-badge-featured">Featured</span>{% endif %}
+      {% if property.is_sample %}<span class="hm-badge hm-badge-sample">Sample data</span>{% endif %}
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-secondary-hm" href="{{ property.get_absolute_url }}" target="_blank" rel="noopener">{% icon "eye" 16 %} {% if property.is_public %}View live{% else %}Preview{% endif %}</a>
+    {% if perms.properties.change_property %}<a class="btn btn-primary" href="{% url 'dashboard:property_edit' property.pk %}">Edit</a>{% endif %}
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-8">
+    {% if perms.properties.approve_property and property.status in "pending,correction,draft,rejected" %}
+    <section class="panel mb-4 border-warning">
+      <div class="panel-head"><h2>Review this listing</h2></div>
+      <div class="panel-body">
+        {% if property.review_note %}<p class="small"><strong>Previous note:</strong> {{ property.review_note }}</p>{% endif %}
+        <form method="post" action="{% url 'dashboard:property_review' property.pk %}">
+          {% csrf_token %}
+          {% include "includes/field.html" with field=review_form.action %}
+          {% include "includes/field.html" with field=review_form.note %}
+          <button class="btn btn-primary" type="submit">Submit review</button>
+        </form>
+      </div>
+    </section>
+    {% endif %}
+
+    <section class="panel mb-4">
+      <div class="panel-head"><h2>Details</h2></div>
+      <div class="panel-body">
+        <dl class="dl-grid">
+          <dt>Purpose</dt><dd>{{ property.get_purpose_display }} · {{ property.get_category_display }} · {{ property.property_type }}</dd>
+          <dt>Price</dt><dd>{% if property.price %}{{ property.price|inr }}{% if property.is_rental %} / month{% endif %}{% else %}Contact for price{% endif %} {% if property.price_note %}({{ property.price_note }}){% endif %}</dd>
+          <dt>Area</dt><dd>{{ property.area|num }} {{ property.get_area_unit_display }}</dd>
+          {% if property.bedrooms %}<dt>Configuration</dt><dd>{{ property.bhk_label }}, {{ property.bathrooms|default:"–" }} bath</dd>{% endif %}
+          <dt>Location</dt><dd>{{ property.location_label }}{% if property.project_name %} · {{ property.project_name }}{% endif %}</dd>
+          <dt>Address (private)</dt><dd>{{ property.address|default:"—"|linebreaksbr }}{% if property.show_address %} <span class="hm-badge hm-badge-info">Shown publicly</span>{% endif %}</dd>
+          <dt>Owner (private)</dt><dd>{{ property.owner_name|default:"—" }}{% if property.owner_phone %} · <a href="tel:{{ property.owner_phone }}">{{ property.owner_phone }}</a>{% endif %}{% if property.owner_email %} · {{ property.owner_email }}{% endif %}{% if property.owner_is_authorised %}<br><small class="text-meta">Owner confirmed they are authorised to list this property.</small>{% endif %}</dd>
+          <dt>Assigned to</dt><dd>{{ property.assigned_to|default:"—" }}</dd>
+          <dt>Verification</dt><dd>{% if property.is_verified %}Verified by {{ property.verified_by|default:"—" }} on {{ property.verified_at|date:"j M Y" }}{% else %}Not verified{% endif %}</dd>
+          <dt>Views</dt><dd>{{ property.view_count }}</dd>
+          <dt>Created</dt><dd>{{ property.created_at|date:"j M Y, H:i" }}{% if property.created_by %} by {{ property.created_by }}{% endif %}</dd>
+          {% if property.published_at %}<dt>Published</dt><dd>{{ property.published_at|date:"j M Y, H:i" }}</dd>{% endif %}
+        </dl>
+        {% if property.description %}<hr><div class="small">{{ property.description|linebreaks }}</div>{% endif %}
+      </div>
+    </section>
+
+    <section class="panel mb-4" id="photos">
+      <div class="panel-head"><h2>Photos ({{ images|length }})</h2></div>
+      <div class="panel-body">
+        <div class="row g-3">
+          {% for img in images %}
+          <div class="col-sm-6 col-lg-4">
+            <div class="img-tile">
+              <img src="{{ img.image.url }}" alt="{{ img.alt }}" loading="lazy">
+              <div class="p-2">
+                {% if img.is_primary %}<span class="hm-badge hm-badge-verified mb-2">Main photo</span>{% endif %}
+                {% if perms.properties.change_property %}
+                <form method="post" action="{% url 'dashboard:property_image_action' property.pk img.pk %}" class="d-grid gap-2">
+                  {% csrf_token %}
+                  <input class="form-control form-control-sm" name="alt_text" value="{{ img.alt_text }}" placeholder="Alt text (describe the photo)" aria-label="Alt text">
+                  <input class="form-control form-control-sm" name="caption" value="{{ img.caption }}" placeholder="Caption" aria-label="Caption">
+                  <input class="form-control form-control-sm" type="number" min="0" name="sort_order" value="{{ img.sort_order }}" aria-label="Order">
+                  <div class="d-flex gap-1 flex-wrap">
+                    <button class="btn btn-sm btn-secondary-hm" name="action" value="update">Save</button>
+                    {% if not img.is_primary %}<button class="btn btn-sm btn-secondary-hm" name="action" value="primary">Make main</button>{% endif %}
+                    <button class="btn btn-sm btn-outline-danger" name="action" value="delete" data-confirm="Delete this photo?">Delete</button>
+                  </div>
+                </form>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% empty %}<p class="text-meta">No photos yet. The website shows a brand illustration until photos are added.</p>{% endfor %}
+        </div>
+        {% if perms.properties.change_property %}
+        <form class="mt-3 dropzone" method="post" enctype="multipart/form-data" action="{% url 'dashboard:property_images_upload' property.pk %}">
+          {% csrf_token %}
+          <label class="form-label" for="{{ upload_form.photos.id_for_label }}">Add photos (JPG, PNG or WebP, max 5 MB each)</label>
+          {{ upload_form.photos }}
+          <button class="btn btn-primary mt-2" type="submit">{% icon "upload" 16 %} Upload</button>
+        </form>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+
+  <div class="col-xl-4">
+    <section class="panel mb-4">
+      <div class="panel-head"><h2>Enquiries for this listing</h2></div>
+      <ul class="list-group list-group-flush">
+        {% for l in leads %}<li class="list-group-item"><a href="{% url 'dashboard:lead_detail' l.pk %}">{{ l.lead_id }} · {{ l.name }}</a><div class="small text-meta">{{ l.get_status_display }} · {{ l.created_at|date:"j M" }}</div></li>
+        {% empty %}<li class="list-group-item text-meta">No enquiries yet{% if not perms.leads.view_all_leads %} assigned to you{% endif %}.</li>{% endfor %}
+      </ul>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h2>History</h2></div>
+      <ul class="list-group list-group-flush small">
+        {% for h in history %}<li class="list-group-item"><strong>{{ h.get_action_display }}</strong> · {{ h.actor|default:"System" }}<div class="text-meta">{{ h.created_at|date:"j M Y, H:i" }} – {{ h.description|truncatechars:90 }}</div></li>
+        {% empty %}<li class="list-group-item text-meta">No changes recorded yet.</li>{% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+{% endblock %}

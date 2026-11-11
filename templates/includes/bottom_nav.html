@@ -1,0 +1,9 @@
+{% with url_name=request.resolver_match.url_name %}
+<nav class="bottom-nav" aria-label="Quick navigation">
+  <a href="{% url 'core:home' %}" class="{% if url_name == 'home' %}active{% endif %}">{% icon "compass" 22 %}<span>Home</span></a>
+  <a href="{% url 'properties:buy' %}" class="{% if url_name == 'buy' %}active{% endif %}">{% icon "search" 22 %}<span>Buy</span></a>
+  <a href="{% url 'properties:post_property' %}" class="bn-post"><span class="bn-circle">{% icon "plus" 22 %}</span><span>Post</span></a>
+  <a href="{% url 'properties:rent' %}" class="{% if url_name == 'rent' %}active{% endif %}">{% icon "rent" 22 %}<span>Rent</span></a>
+  <a href="{% url 'pages:contact' %}" class="{% if url_name == 'contact' %}active{% endif %}">{% icon "phone" 22 %}<span>Contact</span></a>
+</nav>
+{% endwith %}

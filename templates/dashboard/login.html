@@ -1,0 +1,30 @@
+{% load static %}<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
+  <title>Staff login · {{ site.brand_name }}</title>
+  <link rel="icon" href="{% static 'images/brand/favicon.svg' %}" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body class="dash">
+<main class="login-wrap">
+  <div class="hm-card hm-card-body p-4 p-md-5" style="width:100%;max-width:420px">
+    <img src="{% static 'images/brand/logo-horizontal.svg' %}" alt="{{ site.brand_name }}" width="185" height="46" class="mb-4">
+    <h1 class="h4 mb-1">Staff login</h1>
+    <p class="text-meta small mb-4">Authorised Hamara Makaan staff only.</p>
+    {% if lockout_message %}<div class="alert alert-danger">{{ lockout_message }}</div>{% endif %}
+    {% if form.non_field_errors %}<div class="alert alert-danger">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>{% endif %}
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      {% include "includes/field.html" with field=form.username %}
+      {% include "includes/field.html" with field=form.password %}
+      <button class="btn btn-primary w-100" type="submit">Log in</button>
+    </form>
+  </div>
+</main>
+</body>
+</html>

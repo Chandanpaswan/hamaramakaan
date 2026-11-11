@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{% if category %}{{ category.name }} – {% endif %}Property guides &amp; news{% if page_obj.number > 1 %} – page {{ page_obj.number }}{% endif %} | {{ site.brand_name }} blog{% endblock %}
+{% block meta_description %}{% if category.description %}{{ category.description }}{% else %}Buying guides, rental tips and local insights on Faridabad and Delhi NCR real estate from {{ site.brand_name }}.{% endif %}{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+      {% if category %}<li class="breadcrumb-item"><a href="{% url 'blog:list' %}">Blog</a></li><li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>
+      {% else %}<li class="breadcrumb-item active" aria-current="page">Blog</li>{% endif %}
+    </ol></nav>
+    <div class="d-flex flex-wrap justify-content-between gap-3 align-items-end">
+      <div><h1 class="mb-1">{% if category %}{{ category.name }}{% else %}Property guides &amp; insights{% endif %}</h1><p class="text-meta mb-0">Practical advice for buyers, sellers, landlords and tenants.</p></div>
+      <form method="get" role="search" class="d-flex gap-2" style="max-width:360px;width:100%">
+        <label class="visually-hidden" for="blog-q">Search articles</label>
+        <input class="form-control" id="blog-q" type="search" name="q" value="{{ q }}" placeholder="Search articles" maxlength="100">
+        <button class="btn btn-primary" type="submit" aria-label="Search">{% icon "search" 18 %}</button>
+      </form>
+    </div>
+    {% if categories %}<div class="d-flex flex-wrap gap-2 mt-3"><a class="chip {% if not category %}on{% endif %}" href="{% url 'blog:list' %}">All</a>{% for c in categories %}<a class="chip {% if category == c %}on{% endif %}" href="{{ c.get_absolute_url }}">{{ c.name }}</a>{% endfor %}</div>{% endif %}
+  </div>
+</div>
+<div class="container section-sm">
+  {% if featured %}
+  <article class="hm-card overflow-hidden mb-4 position-relative">
+    <div class="row g-0">
+      <div class="col-md-6"><div class="post-card border-0 rounded-0 h-100"><div class="post-media h-100" style="aspect-ratio:auto;min-height:240px">{% if featured.featured_image %}<img src="{{ featured.featured_image.url }}" alt="{{ featured.featured_image_alt|default:featured.title }}">{% endif %}</div></div></div>
+      <div class="col-md-6 p-4 p-lg-5 d-flex flex-column justify-content-center">
+        <span class="hm-badge hm-badge-featured align-self-start mb-2">Featured</span>
+        <h2><a class="stretched-link text-decoration-none text-ink" href="{{ featured.get_absolute_url }}">{{ featured.title }}</a></h2>
+        <p class="text-meta">{{ featured.excerpt }}</p>
+        <p class="post-meta mb-0">{{ featured.published_at|date:"j M Y" }} · {{ featured.reading_minutes }} min read</p>
+      </div>
+    </div>
+  </article>
+  {% endif %}
+  {% if posts %}
+    <div class="row g-3 g-lg-4">{% for post in posts %}<div class="col-md-6 col-lg-4">{% include "includes/post_card.html" %}</div>{% endfor %}</div>
+    {% include "includes/pagination.html" %}
+  {% else %}
+    <div class="empty-state"><span class="empty-icon">{% icon "layers" 28 %}</span><h2 class="h5">No articles found</h2>{% if q %}<p class="text-meta">Try a different search.</p><a class="btn btn-secondary-hm" href="{% url 'blog:list' %}">Clear search</a>{% else %}<p class="text-meta mb-0">New articles are coming soon.</p>{% endif %}</div>
+  {% endif %}
+</div>
+{% endblock %}

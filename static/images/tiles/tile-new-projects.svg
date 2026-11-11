@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<title>New Projects tile</title>
+<rect x="0" y="0" width="256" height="256" rx="64" fill="#E8EEFC" opacity="1"/><g transform="translate(64,64) scale(5.333333333333333)" fill="none" stroke="#1D4ED8" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z" />
+  <path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5" />
+  <path d="M4 15v-3a6 6 0 0 1 6-6" />
+  <path d="M14 6a6 6 0 0 1 6 6v3" /></g>
+</svg>

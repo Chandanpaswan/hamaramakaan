@@ -1,0 +1,18 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Security & audit{% endblock %}{% block heading %}Security &amp; audit{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Security &amp; audit log</h1>
+<div class="status-tabs">
+  <a class="chip {% if not request.GET.action %}on{% endif %}" href="?">All</a>
+  {% for v, l in actions %}<a class="chip {% if request.GET.action == v %}on{% endif %}" href="?action={{ v }}">{{ l }}</a>{% endfor %}
+</div>
+<form class="filter-bar mb-3" method="get">{% if request.GET.action %}<input type="hidden" name="action" value="{{ request.GET.action }}">{% endif %}<input class="form-control" type="search" name="q" value="{{ request.GET.q }}" placeholder="Search user, target or description" aria-label="Search audit log"><button class="btn btn-secondary-hm" type="submit">Search</button></form>
+<div class="panel"><div class="table-responsive"><table class="table table-dash">
+  <thead><tr><th>When</th><th>User</th><th>Action</th><th>Target</th><th>Details</th><th>IP</th></tr></thead>
+  <tbody>
+  {% for a in page_obj %}<tr><td class="text-nowrap small">{{ a.created_at|date:"j M Y, H:i:s" }}</td><td>{{ a.actor|default:"—" }}</td><td><span class="hm-badge {% if a.action == 'login_failed' %}hm-badge-error{% elif a.action == 'export' or a.action == 'permission' %}hm-badge-featured{% else %}hm-badge-muted{% endif %}">{{ a.get_action_display }}</span></td><td class="small">{{ a.target_type }} {{ a.target_id }}</td><td class="small">{{ a.description }}</td><td class="small text-meta">{{ a.ip_address|default:"" }}</td></tr>
+  {% empty %}<tr><td colspan="6" class="text-meta text-center py-4">No entries.</td></tr>{% endfor %}
+  </tbody>
+</table></div></div>
+{% include "includes/pagination.html" %}
+{% endblock %}

@@ -1,0 +1,13 @@
+{% if breadcrumbs %}
+<nav aria-label="Breadcrumb">
+  <ol class="breadcrumb">
+    {% for label, url in breadcrumbs %}
+      {% if url and not forloop.last %}<li class="breadcrumb-item"><a href="{{ url }}">{{ label }}</a></li>
+      {% else %}<li class="breadcrumb-item active" aria-current="page">{{ label|truncatechars:60 }}</li>{% endif %}
+    {% endfor %}
+  </ol>
+</nav>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{% for label, url in breadcrumbs %}{"@type":"ListItem","position":{{ forloop.counter }},"name":"{{ label|escapejs }}"{% if url %},"item":"{{ request.scheme }}://{{ request.get_host }}{{ url|escapejs }}"{% endif %}}{% if not forloop.last %},{% endif %}{% endfor %}]}
+</script>
+{% endif %}

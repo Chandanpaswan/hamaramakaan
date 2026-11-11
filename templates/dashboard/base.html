@@ -1,0 +1,57 @@
+{% load static %}<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}Dashboard{% endblock %} · {{ site.brand_name }}</title>
+  <link rel="icon" href="{% static 'images/brand/favicon.svg' %}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body class="dash">
+{% with url_name=request.resolver_match.url_name slug=request.resolver_match.kwargs.slug %}
+<div class="dash-shell">
+  <nav class="dash-sidebar" id="dashSidebar" aria-label="Dashboard navigation">
+    <a class="brand" href="{% url 'dashboard:home' %}"><img src="{% static 'images/brand/logo-horizontal-white.svg' %}" alt="{{ site.brand_name }} dashboard" width="137" height="34"></a>
+    <a href="{% url 'dashboard:home' %}" class="{% if url_name == 'home' %}active{% endif %}">{% icon "compass" 18 %} Overview</a>
+    {% if perms.properties.view_property %}<a href="{% url 'dashboard:property_list' %}" class="{% if 'property' in url_name %}active{% endif %}">{% icon "apartment" 18 %} Properties{% if nav_pending %}<span class="count" title="Pending review">{{ nav_pending }}</span>{% endif %}</a>{% endif %}
+    {% if perms.leads.view_lead %}<a href="{% url 'dashboard:lead_list' %}" class="{% if 'lead' in url_name %}active{% endif %}">{% icon "user" 18 %} Leads{% if nav_new_leads %}<span class="count" title="New leads">{{ nav_new_leads }}</span>{% endif %}</a>{% endif %}
+    {% for group, items in nav_groups.items %}
+      <div class="nav-section">{{ group }}</div>
+      {% for title, url, item_slug in items %}<a href="{{ url }}" class="{% if slug == item_slug %}active{% endif %}">{{ title }}</a>{% endfor %}
+    {% endfor %}
+    {% if perms.core.view_reports or perms.accounts.view_user or perms.core.change_sitesetting or perms.core.view_auditlog %}<div class="nav-section">Admin</div>{% endif %}
+    {% if perms.core.view_reports %}<a href="{% url 'dashboard:reports' %}" class="{% if url_name == 'reports' %}active{% endif %}">{% icon "list" 18 %} Reports</a>{% endif %}
+    {% if perms.accounts.view_user %}<a href="{% url 'dashboard:user_list' %}" class="{% if 'user' in url_name %}active{% endif %}">{% icon "user" 18 %} Staff &amp; roles</a>{% endif %}
+    {% if perms.core.change_sitesetting %}<a href="{% url 'dashboard:settings' %}" class="{% if url_name == 'settings' %}active{% endif %}">{% icon "sliders-horizontal" 18 %} Website settings</a>{% endif %}
+    {% if perms.core.view_auditlog %}<a href="{% url 'dashboard:audit_log' %}" class="{% if url_name == 'audit_log' %}active{% endif %}">{% icon "shield-check" 18 %} Security &amp; audit</a>{% endif %}
+  </nav>
+  <div class="dash-main">
+    <header class="dash-topbar">
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-secondary-hm icon-btn d-lg-none" type="button" onclick="document.getElementById('dashSidebar').classList.toggle('open')" aria-label="Toggle navigation">{% icon "menu" 20 %}</button>
+        <span class="fw-semibold text-ink">{% block heading %}{% endblock %}</span>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <a class="btn btn-ghost btn-sm" href="{% url 'core:home' %}" target="_blank" rel="noopener">{% icon "eye" 16 %} <span class="d-none d-sm-inline">View site</span></a>
+        <span class="small text-meta d-none d-md-inline">{{ user.get_full_name|default:user.username }} · {{ user.role_names|join:", "|default:"Staff" }}</span>
+        <form method="post" action="{% url 'dashboard:logout' %}">{% csrf_token %}<button class="btn btn-secondary-hm btn-sm" type="submit">{% icon "log-out" 16 %} <span class="d-none d-sm-inline">Log out</span></button></form>
+      </div>
+    </header>
+    <main class="dash-content" id="main">
+      {% for message in messages %}
+      <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
+      {% endfor %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endwith %}
+<script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}" defer></script>
+<script src="{% static 'js/site.js' %}" defer></script>
+</body>
+</html>

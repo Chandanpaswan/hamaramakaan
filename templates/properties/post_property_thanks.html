@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Thank you – property received | {{ site.brand_name }}{% endblock %}
+{% block content %}
+<div class="container section" style="max-width:720px">
+  <div class="hm-card hm-card-body text-center p-4 p-md-5">
+    <span class="empty-icon d-inline-grid mb-3" style="width:72px;height:72px;border-radius:50%;background:var(--hm-success-tint);color:var(--hm-success);place-items:center">{% icon "badge-check" 36 %}</span>
+    <h1 class="h2">Thank you! We’ve received your property.</h1>
+    <p class="lead text-meta">Your reference number is <strong class="text-ink">{{ reference }}</strong>.</p>
+    <p class="text-meta">Our team will review the details and may contact you to confirm them. Your listing goes live only after approval.</p>
+    <div class="d-flex gap-2 justify-content-center flex-wrap mt-4">
+      <a class="btn btn-primary" href="{% url 'core:home' %}">Back to home</a>
+      <a class="btn btn-secondary-hm" href="{% url 'properties:post_property' %}">Post another property</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

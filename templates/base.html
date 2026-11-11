@@ -1,0 +1,47 @@
+{% load static %}<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site.brand_name }} – Property for sale & rent in Faridabad, Delhi NCR{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ site.default_meta_description }}{% endblock %}">
+  {% if noindex %}<meta name="robots" content="noindex, follow">{% endif %}
+  <link rel="canonical" href="{% block canonical %}{% absolute_url %}{% endblock %}">
+  <meta property="og:site_name" content="{{ site.brand_name }}">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}{{ site.brand_name }}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ site.default_meta_description }}{% endblock %}">
+  <meta property="og:url" content="{% absolute_url %}">
+  <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/brand/social-logo.png' %}{% endblock %}">
+  <meta name="twitter:card" content="summary_large_image">
+  {% if site.search_console_verification %}<meta name="google-site-verification" content="{{ site.search_console_verification }}">{% endif %}
+  <link rel="icon" href="{% static 'images/brand/favicon.ico' %}" sizes="any">
+  <link rel="icon" href="{% static 'images/brand/favicon.svg' %}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{% static 'images/brand/apple-touch-icon-180.png' %}">
+  <meta name="theme-color" content="#0B1F4D">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  {% block extra_head %}{% endblock %}
+  {% block structured_data %}{% endblock %}
+  {% if site.ga4_measurement_id %}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.ga4_measurement_id }}"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","{{ site.ga4_measurement_id|escapejs }}");</script>
+  {% endif %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="visually-hidden-focusable" href="#main">Skip to main content</a>
+  {% include "includes/header.html" %}
+  {% include "includes/messages.html" %}
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+  {% include "includes/footer.html" %}
+  {% include "includes/bottom_nav.html" %}
+  <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}" defer></script>
+  <script src="{% static 'js/site.js' %}" defer></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

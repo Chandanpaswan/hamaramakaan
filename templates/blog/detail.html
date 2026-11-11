@@ -1,0 +1,42 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}{{ post.seo_title|default:post.title }} | {{ site.brand_name }}{% endblock %}
+{% block meta_description %}{{ post.seo_description|default:post.excerpt|default:post.body|truncatechars:160 }}{% endblock %}
+{% block canonical %}{% if post.canonical_url %}{{ post.canonical_url }}{% else %}{% absolute_url %}{% endif %}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ post.title }}{% endblock %}
+{% block og_image %}{% if post.featured_image %}{{ request.scheme }}://{{ request.get_host }}{{ post.featured_image.url }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block structured_data %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"{{ post.title|escapejs }}","description":"{{ post.excerpt|escapejs }}","datePublished":"{{ post.published_at|date:'c' }}","dateModified":"{{ post.updated_at|date:'c' }}","author":{"@type":"Person","name":"{{ post.author_name|escapejs }}"},"publisher":{"@type":"Organization","name":"{{ site.brand_name|escapejs }}","logo":{"@type":"ImageObject","url":"{{ request.scheme }}://{{ request.get_host }}{% static 'images/brand/social-logo.png' %}"}},"mainEntityOfPage":"{% absolute_url %}"{% if post.featured_image %},"image":"{{ request.scheme }}://{{ request.get_host }}{{ post.featured_image.url }}"{% endif %}}
+</script>
+{% endblock %}
+{% block content %}
+{% if preview %}<div class="preview-banner"><div class="container">Preview – this article is “{{ post.get_status_display }}” and not yet public.</div></div>{% endif %}
+<article class="container section-sm">
+  <div class="article">
+    <nav aria-label="Breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'blog:list' %}">Blog</a></li>
+      {% if post.category %}<li class="breadcrumb-item"><a href="{{ post.category.get_absolute_url }}">{{ post.category.name }}</a></li>{% endif %}
+      <li class="breadcrumb-item active" aria-current="page">{{ post.title|truncatechars:40 }}</li>
+    </ol></nav>
+    <h1>{{ post.title }}</h1>
+    <p class="post-meta mb-4">By {{ post.author_name }} · <time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"j F Y" }}</time> · {{ post.reading_minutes }} min read</p>
+    {% if post.featured_image %}<img class="w-100 rounded-4 mb-4" src="{{ post.featured_image.url }}" alt="{{ post.featured_image_alt|default:post.title }}">{% endif %}
+    {% if post.excerpt %}<p class="lead text-ink">{{ post.excerpt }}</p>{% endif %}
+    <div class="rich-text">{{ post.body|rich_text }}</div>
+    {% if post.tags.all %}<div class="d-flex flex-wrap gap-2 mt-4">{% for t in post.tags.all %}<span class="hm-badge hm-badge-muted">#{{ t.name }}</span>{% endfor %}</div>{% endif %}
+    <div class="cta-band mt-5 p-4">
+      <h2 class="h4">Looking for a property?</h2>
+      <p class="text-meta">Tell us your requirement and our team will share suitable options.</p>
+      <div class="d-flex gap-2 flex-wrap"><a class="btn btn-primary" href="{% url 'properties:list' %}">Browse properties</a><a class="btn btn-secondary-hm" href="{% url 'pages:contact' %}">Contact us</a></div>
+    </div>
+  </div>
+  {% if related %}
+  <section class="mt-5" aria-labelledby="related-title">
+    <h2 id="related-title" class="mb-3">Related articles</h2>
+    <div class="row g-3 g-lg-4">{% for post in related %}<div class="col-md-4">{% include "includes/post_card.html" %}</div>{% endfor %}</div>
+  </section>
+  {% endif %}
+</article>
+{% endblock %}

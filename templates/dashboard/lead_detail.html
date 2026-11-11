@@ -1,0 +1,88 @@
+{% extends "dashboard/base.html" %}
+{% block title %}{{ lead.lead_id }}{% endblock %}{% block heading %}Leads{% endblock %}
+{% block content %}
+<a class="small" href="{% url 'dashboard:lead_list' %}">← All leads</a>
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3 mt-1">
+  <div>
+    <h1 class="h3 mb-1">{{ lead.name }}</h1>
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+      <span class="text-meta">{{ lead.lead_id }}</span>
+      <span class="hm-badge hm-badge-info">{{ lead.get_status_display }}</span>
+      <span class="hm-badge hm-badge-muted">{{ lead.get_priority_display }} priority</span>
+      {% if lead.is_archived %}<span class="hm-badge hm-badge-error">Archived</span>{% endif %}
+      {% if lead.follow_up_overdue %}<span class="hm-badge hm-badge-error">Follow-up overdue</span>{% endif %}
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-primary" href="tel:{{ lead.phone }}">{% icon "phone" 16 %} Call</a>
+    {% if perms.leads.change_lead %}<form method="post">{% csrf_token %}<input type="hidden" name="form" value="archive"><button class="btn btn-secondary-hm" type="submit">{% if lead.is_archived %}Restore{% else %}Archive{% endif %}</button></form>{% endif %}
+  </div>
+</div>
+<div class="row g-4">
+  <div class="col-xl-7">
+    <section class="panel mb-4">
+      <div class="panel-head"><h2>Enquiry</h2></div>
+      <div class="panel-body">
+        <dl class="dl-grid">
+          <dt>Phone</dt><dd><a href="tel:{{ lead.phone }}">{{ lead.phone }}</a></dd>
+          <dt>Email</dt><dd>{% if lead.email %}<a href="mailto:{{ lead.email }}">{{ lead.email }}</a>{% else %}—{% endif %}</dd>
+          <dt>Prefers</dt><dd>{{ lead.get_preferred_contact_method_display }}</dd>
+          <dt>Requirement</dt><dd>{{ lead.get_requirement_display }}</dd>
+          <dt>Interested in</dt><dd>{% if lead.interested_property %}<a href="{% url 'dashboard:property_detail' lead.interested_property.pk %}">{{ lead.interested_property.listing_id }} – {{ lead.interested_property.title }}</a>{% elif lead.interested_project %}{{ lead.interested_project.name }}{% else %}—{% endif %}</dd>
+          <dt>Budget</dt><dd>{% if lead.budget_min or lead.budget_max %}{{ lead.budget_min|inr_short|default:"–" }} to {{ lead.budget_max|inr_short|default:"–" }}{% else %}—{% endif %}</dd>
+          <dt>Preferred location</dt><dd>{{ lead.preferred_location|default:"—" }}</dd>
+          <dt>Source</dt><dd>{{ lead.get_source_display }}{% if lead.campaign %} · campaign “{{ lead.campaign }}”{% endif %}{% if lead.source_url %}<br><small class="text-meta text-break">{{ lead.source_url }}</small>{% endif %}</dd>
+          <dt>Consent</dt><dd>{% if lead.consent %}Yes{% if lead.consent_at %}, {{ lead.consent_at|date:"j M Y, H:i" }}{% endif %}{% else %}No{% endif %}</dd>
+          <dt>Received</dt><dd>{{ lead.created_at|date:"j M Y, H:i" }}</dd>
+        </dl>
+        {% if lead.message %}<hr><p class="mb-0">{{ lead.message|linebreaksbr }}</p>{% endif %}
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h2>Activity</h2></div>
+      <div class="panel-body">
+        {% if perms.leads.add_leadnote %}
+        <form method="post" class="mb-3">{% csrf_token %}<input type="hidden" name="form" value="note">
+          {% include "includes/field.html" with field=note_form.note %}
+          <button class="btn btn-primary btn-sm" type="submit">Add note</button>
+        </form>
+        {% endif %}
+        <ul class="timeline">
+          {% for kind, when, item in timeline %}
+            <li class="t-{{ kind }}">
+              <div class="small text-meta">{{ when|date:"j M Y, H:i" }}</div>
+              {% if kind == "note" %}<strong>{{ item.author|default:"Staff" }}</strong> added a note<div class="mt-1">{{ item.note|linebreaksbr }}</div>
+              {% elif kind == "status" %}Status {% if item.from_status %}changed from <strong>{{ item.get_from_status_display }}</strong> to {% else %}set to {% endif %}<strong>{{ item.get_to_status_display }}</strong>{% if item.changed_by %} by {{ item.changed_by }}{% endif %}
+              {% else %}Assigned to <strong>{{ item.assigned_to|default:"nobody" }}</strong>{% if item.assigned_by %} by {{ item.assigned_by }}{% endif %}{% endif %}
+            </li>
+          {% empty %}<li>No activity yet.</li>{% endfor %}
+        </ul>
+      </div>
+    </section>
+  </div>
+  <div class="col-xl-5">
+    {% if perms.leads.change_lead %}
+    <section class="panel mb-4">
+      <div class="panel-head"><h2>Update lead</h2></div>
+      <div class="panel-body">
+        <form method="post">{% csrf_token %}<input type="hidden" name="form" value="update">
+          {% include "dashboard/includes/form_fields.html" with form=update_form %}
+          <button class="btn btn-primary mt-3" type="submit">Save changes</button>
+        </form>
+      </div>
+    </section>
+    {% endif %}
+    <section class="panel">
+      <div class="panel-head"><h2>Assignment</h2></div>
+      <div class="panel-body">
+        {% if perms.leads.assign_lead %}
+        <form method="post">{% csrf_token %}<input type="hidden" name="form" value="assign">
+          {% include "includes/field.html" with field=assign_form.assigned_to %}
+          <button class="btn btn-secondary-hm" type="submit">Save assignment</button>
+        </form>
+        {% else %}<p class="mb-0">Assigned to <strong>{{ lead.assigned_to|default:"nobody" }}</strong></p>{% endif %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

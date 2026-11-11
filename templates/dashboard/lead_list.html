@@ -1,0 +1,47 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Leads{% endblock %}{% block heading %}Leads{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h1 class="h3 mb-0">Leads{% if not perms.leads.view_all_leads %} <small class="text-meta fs-6">assigned to you</small>{% endif %}</h1>
+  <div class="d-flex gap-2">
+    {% if perms.leads.export_lead %}<a class="btn btn-secondary-hm" href="{% url 'dashboard:lead_export' %}?{{ request.GET.urlencode }}">Export CSV</a>{% endif %}
+    {% if perms.leads.add_lead %}<a class="btn btn-primary" href="{% url 'dashboard:lead_create' %}">{% icon "plus" 18 %} Add lead</a>{% endif %}
+  </div>
+</div>
+<form class="filter-bar mb-3" method="get" data-clean-get>
+  <input class="form-control" type="search" name="q" value="{{ request.GET.q }}" placeholder="Name, phone, email or lead ID" aria-label="Search leads" style="min-width:240px">
+  <select class="form-select" name="status" aria-label="Status"><option value="">Any status</option>{% for v, l in statuses %}<option value="{{ v }}" {% if request.GET.status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+  <select class="form-select" name="source" aria-label="Source"><option value="">Any source</option>{% for v, l in sources %}<option value="{{ v }}" {% if request.GET.source == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+  <select class="form-select" name="priority" aria-label="Priority"><option value="">Any priority</option>{% for v, l in priorities %}<option value="{{ v }}" {% if request.GET.priority == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+  {% if staff %}<select class="form-select" name="assigned" aria-label="Assigned to"><option value="">Anyone</option><option value="none" {% if request.GET.assigned == "none" %}selected{% endif %}>Unassigned</option>{% for s in staff %}<option value="{{ s.pk }}" {% if request.GET.assigned == s.pk|stringformat:"d" %}selected{% endif %}>{{ s }}</option>{% endfor %}</select>{% endif %}
+  <label class="small text-meta" for="df">From</label><input class="form-control" id="df" type="date" name="date_from" value="{{ request.GET.date_from }}">
+  <label class="small text-meta" for="dt">To</label><input class="form-control" id="dt" type="date" name="date_to" value="{{ request.GET.date_to }}">
+  <label class="form-check small mb-0"><input class="form-check-input" type="checkbox" name="due" value="1" {% if request.GET.due == "1" %}checked{% endif %}> Follow-up due</label>
+  <label class="form-check small mb-0"><input class="form-check-input" type="checkbox" name="archived" value="1" {% if request.GET.archived == "1" %}checked{% endif %}> Include archived</label>
+  <button class="btn btn-secondary-hm" type="submit">Filter</button>
+  {% if request.GET %}<a class="small" href="{% url 'dashboard:lead_list' %}">Clear</a>{% endif %}
+</form>
+<div class="panel">
+  <div class="table-responsive">
+    <table class="table table-dash">
+      <thead><tr><th>Lead</th><th>Requirement</th><th>Interested in</th><th>Source</th><th>Status</th><th>Priority</th><th>Assigned</th><th>Follow-up</th><th>Received</th></tr></thead>
+      <tbody>
+      {% for l in page_obj %}
+        <tr>
+          <td><a class="fw-semibold" href="{% url 'dashboard:lead_detail' l.pk %}">{{ l.name }}</a><div class="small text-meta">{{ l.lead_id }} · {{ l.phone }}</div></td>
+          <td>{{ l.get_requirement_display }}</td>
+          <td class="small">{% if l.interested_property %}{{ l.interested_property.listing_id }}{% elif l.interested_project %}{{ l.interested_project.name|truncatechars:24 }}{% else %}—{% endif %}</td>
+          <td class="small">{{ l.get_source_display }}</td>
+          <td><span class="hm-badge {% if l.status == 'new' %}hm-badge-featured{% elif l.status == 'converted' %}hm-badge-verified{% elif not l.is_open %}hm-badge-muted{% else %}hm-badge-info{% endif %}">{{ l.get_status_display }}</span></td>
+          <td class="small">{{ l.get_priority_display }}</td>
+          <td class="small">{{ l.assigned_to|default:"—" }}</td>
+          <td class="small text-nowrap {% if l.follow_up_overdue %}text-danger fw-semibold{% endif %}">{{ l.next_follow_up|date:"j M"|default:"—" }}</td>
+          <td class="small text-nowrap">{{ l.created_at|date:"j M, H:i" }}</td>
+        </tr>
+      {% empty %}<tr><td colspan="9" class="text-center text-meta py-4">No leads match these filters.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include "includes/pagination.html" %}
+{% endblock %}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<title>Office Space tile</title>
+<rect x="0" y="0" width="256" height="256" rx="64" fill="#E8EEFC" opacity="1"/><g transform="translate(64,64) scale(5.333333333333333)" fill="none" stroke="#1D4ED8" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h.01" />
+  <path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+  <path d="M22 13a18.15 18.15 0 0 1-20 0" />
+  <rect width="20" height="14" x="2" y="6" rx="2" /></g>
+</svg>

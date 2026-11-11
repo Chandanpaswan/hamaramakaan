@@ -1,0 +1,16 @@
+{% extends "dashboard/base.html" %}
+{% block title %}{{ title }}{% endblock %}{% block heading %}{{ title }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h1 class="h3 mb-0">{{ title }}</h1>
+  <div class="d-flex gap-2">
+    {% if extra_link %}<a class="btn btn-secondary-hm" href="{{ extra_link.0 }}">{{ extra_link.1 }}</a>{% endif %}
+    <a class="btn btn-secondary-hm" href="{{ back }}">Cancel</a>
+  </div>
+</div>
+<form method="post" class="form-section" novalidate {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
+  {% csrf_token %}
+  {% include "dashboard/includes/form_fields.html" %}
+  <button class="btn btn-primary mt-3" type="submit">Save</button>
+</form>
+{% endblock %}

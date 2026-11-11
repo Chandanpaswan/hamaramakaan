@@ -1,0 +1,34 @@
+# Secrets & environment
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+/media/
+/staticfiles/
+/test_media/
+*.log
+
+# Backups / exports (may contain customer data)
+backups/
+*.dump
+*.sql.gz
+leads-*.csv
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini

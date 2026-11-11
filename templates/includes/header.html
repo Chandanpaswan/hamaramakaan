@@ -1,0 +1,53 @@
+{% load static %}{% with ns=request.resolver_match.namespace url_name=request.resolver_match.url_name %}
+<header class="site-header">
+  <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
+    <div class="container">
+      <a class="navbar-brand me-lg-4" href="{% url 'core:home' %}">
+        <img class="brand-logo" src="{% static 'images/brand/logo-horizontal.svg' %}" alt="{{ site.brand_name }} – home" width="161" height="40">
+      </a>
+      <div class="d-flex align-items-center gap-2 d-lg-none">
+        {% if site.phone %}<a class="btn btn-secondary-hm icon-btn" href="tel:{{ site.phone_href }}" aria-label="Call {{ site.brand_name }}">{% icon "phone" 18 %}</a>{% endif %}
+        <button class="btn btn-secondary-hm icon-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainMenu" aria-controls="mainMenu" aria-label="Open menu">{% icon "menu" 20 %}</button>
+      </div>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav main-nav me-auto gap-1">
+          <li class="nav-item"><a class="nav-link {% if url_name == 'buy' or url_name == 'buy_city' %}active{% endif %}" href="{% url 'properties:buy' %}" {% if url_name == 'buy' %}aria-current="page"{% endif %}>Buy</a></li>
+          <li class="nav-item"><a class="nav-link {% if url_name == 'rent' or url_name == 'rent_city' %}active{% endif %}" href="{% url 'properties:rent' %}" {% if url_name == 'rent' %}aria-current="page"{% endif %}>Rent</a></li>
+          <li class="nav-item"><a class="nav-link {% if url_name == 'commercial' or url_name == 'commercial_city' %}active{% endif %}" href="{% url 'properties:commercial' %}">Commercial</a></li>
+          <li class="nav-item"><a class="nav-link {% if url_name == 'projects' or url_name == 'project_detail' %}active{% endif %}" href="{% url 'properties:projects' %}">New Projects</a></li>
+          <li class="nav-item"><a class="nav-link {% if url_name == 'about' %}active{% endif %}" href="{% url 'pages:about' %}">About</a></li>
+          <li class="nav-item"><a class="nav-link {% if ns == 'blog' %}active{% endif %}" href="{% url 'blog:list' %}">Blog</a></li>
+          <li class="nav-item"><a class="nav-link {% if url_name == 'contact' %}active{% endif %}" href="{% url 'pages:contact' %}">Contact</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-3">
+          {% if site.phone %}<a class="header-call d-none d-xl-inline-flex" href="tel:{{ site.phone_href }}">{% icon "phone" 18 %} {{ site.phone }}</a>{% endif %}
+          <a class="btn btn-post" href="{% url 'properties:post_property' %}">{% icon "plus" 18 %} Post Property <span class="free-tag">FREE</span></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="mainMenu" aria-labelledby="mainMenuLabel">
+  <div class="offcanvas-header border-bottom">
+    <h2 class="offcanvas-title h5 mb-0" id="mainMenuLabel">Menu</h2>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close menu"></button>
+  </div>
+  <div class="offcanvas-body">
+    <nav class="nav flex-column" aria-label="Mobile navigation">
+      <a class="nav-link" href="{% url 'core:home' %}">{% icon "compass" 20 %} Home</a>
+      <a class="nav-link" href="{% url 'properties:buy' %}">{% icon "apartment" 20 %} Buy property</a>
+      <a class="nav-link" href="{% url 'properties:rent' %}">{% icon "rent" 20 %} Rent property</a>
+      <a class="nav-link" href="{% url 'properties:commercial' %}">{% icon "office-space" 20 %} Commercial</a>
+      <a class="nav-link" href="{% url 'properties:projects' %}">{% icon "new-projects" 20 %} New projects</a>
+      <a class="nav-link" href="{% url 'pages:services' %}">{% icon "list" 20 %} Services</a>
+      <a class="nav-link" href="{% url 'pages:about' %}">{% icon "user" 20 %} About us</a>
+      <a class="nav-link" href="{% url 'blog:list' %}">{% icon "layers" 20 %} Blog</a>
+      <a class="nav-link" href="{% url 'pages:faq' %}">{% icon "message-circle" 20 %} FAQs</a>
+      <a class="nav-link" href="{% url 'pages:contact' %}">{% icon "phone" 20 %} Contact us</a>
+    </nav>
+    <a class="btn btn-post w-100 mt-4" href="{% url 'properties:post_property' %}">{% icon "plus" 18 %} Post Property <span class="free-tag">FREE</span></a>
+    {% if site.whatsapp_digits %}<a class="btn btn-wa w-100 mt-2" href="{% url 'leads:whatsapp' %}" rel="nofollow">{% icon "message-circle" 18 %} WhatsApp us</a>{% endif %}
+  </div>
+</div>
+{% endwith %}

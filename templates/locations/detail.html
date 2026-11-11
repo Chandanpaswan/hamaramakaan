@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{% if place.seo_title %}{{ place.seo_title }}{% else %}Property in {{ place.name }}{% if locality %}, {{ city.name }}{% endif %} – buy, rent &amp; commercial{% endif %} | {{ site.brand_name }}{% endblock %}
+{% block meta_description %}{% if place.seo_description %}{{ place.seo_description }}{% else %}Flats, houses, plots and commercial property for sale and rent in {{ place.name }}{% if locality %}, {{ city.name }}{% endif %}. Listings reviewed by {{ site.brand_name }}.{% endif %}{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <nav aria-label="Breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+      {% if locality %}<li class="breadcrumb-item"><a href="{{ city.get_absolute_url }}">{{ city.name }}</a></li>{% endif %}
+      <li class="breadcrumb-item active" aria-current="page">{{ place.name }}</li>
+    </ol></nav>
+    <h1 class="mb-1">Property in {{ place.name }}{% if locality %}, {{ city.name }}{% endif %}</h1>
+    <p class="text-meta mb-3">{{ page_obj.paginator.count }} approved listing{{ page_obj.paginator.count|pluralize }}{% if sale_count or rent_count %} · {{ sale_count }} for sale · {{ rent_count }} for rent/lease{% endif %}</p>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-secondary-hm btn-sm" href="{% url 'properties:buy_city' city.slug %}{% if locality %}?locality={{ locality.pk }}{% endif %}">Buy in {{ place.name }}</a>
+      <a class="btn btn-secondary-hm btn-sm" href="{% url 'properties:rent_city' city.slug %}{% if locality %}?locality={{ locality.pk }}{% endif %}">Rent in {{ place.name }}</a>
+      <a class="btn btn-secondary-hm btn-sm" href="{% url 'properties:commercial_city' city.slug %}{% if locality %}?locality={{ locality.pk }}{% endif %}">Commercial</a>
+    </div>
+  </div>
+</div>
+<div class="container section-sm">
+  {% if place.description %}<section class="hm-card hm-card-body mb-4"><h2 class="h4">About {{ place.name }}</h2><div class="rich-text">{{ place.description|rich_text }}</div></section>{% endif %}
+  {% if localities %}
+  <section class="mb-4" aria-labelledby="loc-title">
+    <h2 id="loc-title" class="h5 mb-3">Localities in {{ city.name }}</h2>
+    <div class="d-flex flex-wrap gap-2">{% for l in localities %}<a class="chip" href="{{ l.get_absolute_url }}">{{ l.name }} <span class="text-meta">({{ l.listing_count }})</span></a>{% endfor %}</div>
+  </section>
+  {% endif %}
+  {% if properties %}
+    <div class="row g-3 g-lg-4">{% for p in properties %}<div class="col-sm-6 col-lg-4 col-xl-3">{% include "includes/property_card.html" %}</div>{% endfor %}</div>
+    {% include "includes/pagination.html" %}
+  {% else %}
+    <div class="empty-state"><span class="empty-icon">{% icon "map-pin" 28 %}</span><h2 class="h5">No listings in {{ place.name }} right now</h2><p class="text-meta">Share your requirement and we’ll let you know when something suitable is available.</p><a class="btn btn-primary" href="{% url 'pages:contact' %}">Contact us</a></div>
+  {% endif %}
+</div>
+{% endblock %}

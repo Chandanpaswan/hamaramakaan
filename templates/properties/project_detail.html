@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ project.seo_title|default:project.name }}{% if not project.seo_title %} – {{ project.location_label }}{% endif %} | {{ site.brand_name }}{% endblock %}
+{% block meta_description %}{{ project.seo_description|default:project.description|truncatechars:160 }}{% endblock %}
+{% block body_class %}has-mobile-cta{% endblock %}
+{% block content %}
+{% if preview %}<div class="preview-banner"><div class="container">Preview – this project is not published.</div></div>{% endif %}
+<div class="container pt-3 pb-5">
+  <nav aria-label="Breadcrumb"><ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'properties:projects' %}">New projects</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
+  </ol></nav>
+  <div class="gallery single">
+    <div class="g-item g-main">
+      <span class="g-badges"><span class="hm-badge hm-badge-info">{{ project.get_status_display }}</span>{% if project.rera_number %}<span class="hm-badge hm-badge-rera">RERA registered</span>{% endif %}{% if project.is_sample %}<span class="hm-badge hm-badge-sample">Sample</span>{% endif %}</span>
+      {% if project.cover_image %}<img src="{{ project.cover_image.url }}" alt="{{ project.cover_image_alt|default:project.name }}">{% else %}{% include "includes/placeholder_art.html" with kind="tower" uid="proj" %}{% endif %}
+    </div>
+  </div>
+  {% if project.is_artist_impression %}<p class="form-text">Image is an artist’s impression.</p>{% endif %}
+  <div class="row g-4 mt-1">
+    <div class="col-lg-8">
+      <h1 class="mb-1">{{ project.name }}</h1>
+      <p class="text-meta">{% icon "map-pin" 16 %} {{ project.location_label }}{% if project.builder_name %} · By {{ project.builder_name }}{% endif %}</p>
+      <section class="hm-card hm-card-body mb-4">
+        <div class="fact-grid">
+          <div class="fact"><small>Price</small><strong>{% if project.price_from %}{{ project.price_from|inr_short }}{% if project.price_to %} – {{ project.price_to|inr_short }}{% endif %}{% else %}On request{% endif %}</strong></div>
+          {% if project.configurations %}<div class="fact"><small>Configurations</small><strong>{{ project.configurations }}</strong></div>{% endif %}
+          <div class="fact"><small>Status</small><strong>{{ project.get_status_display }}</strong></div>
+          {% if project.possession_date %}<div class="fact"><small>Possession</small><strong>{{ project.possession_date|date:"M Y" }}</strong></div>{% endif %}
+          {% if project.rera_number %}<div class="fact"><small>RERA ID</small><strong>{{ project.rera_number }}</strong></div>{% endif %}
+        </div>
+      </section>
+      {% if project.description %}<section class="hm-card hm-card-body mb-4"><h2 class="h4">About the project</h2><div class="rich-text">{{ project.description|linebreaks }}</div></section>{% endif %}
+      {% if project.amenities.all %}<section class="hm-card hm-card-body mb-4"><h2 class="h4 mb-3">Amenities</h2><ul class="amenity-list">{% for a in project.amenities.all %}<li>{% icon a.icon 20 %} {{ a.name }}</li>{% endfor %}</ul></section>{% endif %}
+      {% if listings %}<section class="mb-4"><h2 class="h4 mb-3">Available units</h2><div class="row g-3">{% for p in listings %}<div class="col-sm-6">{% include "includes/property_card.html" %}</div>{% endfor %}</div></section>{% endif %}
+      <p class="small text-meta"><strong>Disclaimer:</strong> Project information is indicative and subject to change by the developer. Verify RERA registration and approvals before booking.</p>
+    </div>
+    <div class="col-lg-4">
+      <aside class="hm-card hm-card-body contact-card" id="enquire" aria-labelledby="enq-title">
+        <h2 id="enq-title" class="h5">Get project details</h2>
+        <div class="d-grid gap-2 mb-3">
+          {% if site.phone %}<a class="btn btn-primary" href="tel:{{ site.phone_href }}">{% icon "phone" 18 %} Call {{ site.phone }}</a>{% endif %}
+          {% if site.whatsapp_digits %}<a class="btn btn-wa" href="{% url 'leads:whatsapp' %}?project={{ project.slug }}" rel="nofollow">{% icon "message-circle" 18 %} WhatsApp</a>{% endif %}
+        </div>
+        {% include "includes/enquiry_form.html" with submit_label="Request details" %}
+      </aside>
+    </div>
+  </div>
+</div>
+<div class="mobile-cta"><a class="btn btn-primary" href="#enquire">{% icon "phone" 18 %} Enquire now</a></div>
+{% endblock %}

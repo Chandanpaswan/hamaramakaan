@@ -1,0 +1,38 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Reports{% endblock %}{% block heading %}Reports{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h1 class="h3 mb-0">Reports</h1>
+  <form method="get" class="d-flex gap-2 align-items-center"><label class="small text-meta" for="days">Period</label>
+    <select class="form-select" id="days" name="days" data-autosubmit>
+      <option value="7" {% if days == 7 %}selected{% endif %}>Last 7 days</option><option value="30" {% if days == 30 %}selected{% endif %}>Last 30 days</option><option value="90" {% if days == 90 %}selected{% endif %}>Last 90 days</option><option value="365" {% if days == 365 %}selected{% endif %}>Last 12 months</option>
+    </select><noscript><button class="btn btn-secondary-hm">Go</button></noscript></form>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3"><div class="kpi"><small>Leads in period</small><strong>{{ total_leads }}</strong></div></div>
+  <div class="col-6 col-lg-3"><div class="kpi"><small>WhatsApp clicks</small><strong>{{ whatsapp_clicks }}</strong></div></div>
+</div>
+<div class="row g-4">
+  <div class="col-lg-4"><section class="panel h-100"><div class="panel-head"><h2>Leads by source</h2></div><table class="table table-dash"><tbody>
+    {% for r in by_source %}<tr><td>{{ source_labels|get_item:r.source }}</td><td class="text-end fw-semibold">{{ r.n }}</td></tr>{% empty %}<tr><td class="text-meta">No leads.</td></tr>{% endfor %}
+  </tbody></table></section></div>
+  <div class="col-lg-4"><section class="panel h-100"><div class="panel-head"><h2>Leads by status</h2></div><table class="table table-dash"><tbody>
+    {% for r in by_status %}<tr><td>{{ status_labels|get_item:r.status }}</td><td class="text-end fw-semibold">{{ r.n }}</td></tr>{% empty %}<tr><td class="text-meta">No leads.</td></tr>{% endfor %}
+  </tbody></table></section></div>
+  <div class="col-lg-4"><section class="panel h-100"><div class="panel-head"><h2>Listings by status (all time)</h2></div><table class="table table-dash"><tbody>
+    {% for r in listing_status %}<tr><td>{{ property_status_labels|get_item:r.status }}</td><td class="text-end fw-semibold">{{ r.n }}</td></tr>{% empty %}<tr><td class="text-meta">No listings.</td></tr>{% endfor %}
+  </tbody></table></section></div>
+  <div class="col-lg-6"><section class="panel h-100"><div class="panel-head"><h2>Most-enquired properties</h2></div><div class="table-responsive"><table class="table table-dash"><thead><tr><th>Listing</th><th class="text-end">Enquiries</th></tr></thead><tbody>
+    {% for p in top_enquired %}<tr><td><a href="{% url 'dashboard:property_detail' p.pk %}">{{ p.listing_id }} · {{ p.title|truncatechars:44 }}</a></td><td class="text-end fw-semibold">{{ p.n }}</td></tr>{% empty %}<tr><td colspan="2" class="text-meta">No enquiries in this period.</td></tr>{% endfor %}
+  </tbody></table></div></section></div>
+  <div class="col-lg-6"><section class="panel h-100"><div class="panel-head"><h2>Most-viewed live listings (all time)</h2></div><div class="table-responsive"><table class="table table-dash"><thead><tr><th>Listing</th><th class="text-end">Views</th></tr></thead><tbody>
+    {% for p in top_viewed %}<tr><td><a href="{% url 'dashboard:property_detail' p.pk %}">{{ p.listing_id }} · {{ p.title|truncatechars:44 }}</a></td><td class="text-end fw-semibold">{{ p.view_count }}</td></tr>{% empty %}<tr><td colspan="2" class="text-meta">No data.</td></tr>{% endfor %}
+  </tbody></table></div></section></div>
+  <div class="col-lg-7"><section class="panel h-100"><div class="panel-head"><h2>Staff follow-up report</h2></div><div class="table-responsive"><table class="table table-dash"><thead><tr><th>Staff</th><th class="text-end">Open</th><th class="text-end">Overdue</th><th class="text-end">Converted</th></tr></thead><tbody>
+    {% for s in staff_report %}<tr><td>{{ s }}</td><td class="text-end">{{ s.open_leads }}</td><td class="text-end {% if s.overdue %}text-danger fw-semibold{% endif %}">{{ s.overdue }}</td><td class="text-end">{{ s.converted }}</td></tr>{% empty %}<tr><td colspan="4" class="text-meta">No assigned leads.</td></tr>{% endfor %}
+  </tbody></table></div></section></div>
+  <div class="col-lg-5"><section class="panel h-100"><div class="panel-head"><h2>Enquiries by day</h2></div><div class="table-responsive" style="max-height:360px"><table class="table table-dash"><tbody>
+    {% for r in by_day %}<tr><td>{{ r.day|date:"D, j M Y" }}</td><td class="text-end fw-semibold">{{ r.n }}</td></tr>{% empty %}<tr><td class="text-meta">No enquiries.</td></tr>{% endfor %}
+  </tbody></table></div></section></div>
+</div>
+{% endblock %}

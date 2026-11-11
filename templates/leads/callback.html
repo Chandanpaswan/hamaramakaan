@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Request a callback | {{ site.brand_name }}{% endblock %}
+{% block content %}
+<div class="container section" style="max-width:520px">
+  <div class="hm-card hm-card-body">
+    <h1 class="h3">Request a callback</h1>
+    <p class="text-meta">Leave your number and our team will call you back.</p>
+    <form method="post" novalidate>
+      {% csrf_token %}<input type="hidden" name="next" value="{{ next }}">
+      {% for field in form %}{% include "includes/field.html" %}{% endfor %}
+      <button class="btn btn-primary w-100" type="submit">Call me back</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
