@@ -1,0 +1,3 @@
+Hero banner placeholder: CC0 1.0 (public domain), via Openverse.
+Source: https://www.rawpixel.com/image/6040724
+Replace it from Dashboard > Website settings > Banner image.

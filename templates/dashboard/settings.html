@@ -8,7 +8,7 @@
   <div class="col-md-4"><div class="kpi"><small>Lead alert recipients</small><strong class="fs-6">{{ lead_recipients }} address{{ lead_recipients|pluralize:"es" }} (LEAD_NOTIFICATION_EMAILS)</strong></div></div>
   <div class="col-md-4"><div class="kpi"><small>Maintenance mode</small><strong class="fs-6">{% if site.maintenance_mode %}ON{% else %}Off{% endif %}</strong></div></div>
 </div>
-<form method="post" novalidate>
+<form method="post" enctype="multipart/form-data" novalidate>
   {% csrf_token %}
   {% if form.errors %}<div class="alert alert-danger">Please correct the highlighted fields.</div>{% endif %}
   <section class="form-section"><h2>Brand</h2><div class="row g-3">
@@ -30,6 +30,8 @@
   <section class="form-section"><h2>Home page &amp; footer text</h2><div class="row g-3">
     <div class="col-md-6">{% include "includes/field.html" with field=form.hero_heading wrapper_class="mb-0" %}</div>
     <div class="col-md-6">{% include "includes/field.html" with field=form.hero_subheading wrapper_class="mb-0" %}</div>
+    <div class="col-md-8">{% include "includes/field.html" with field=form.hero_image wrapper_class="mb-0" %}{% include "includes/field.html" with field=form.hero_image_alt wrapper_class="mt-3 mb-0" %}</div>
+    <div class="col-md-4"><span class="form-label d-block">Current banner</span>{% load static %}<img class="img-tile w-100" style="aspect-ratio:4/3;object-fit:cover" alt="" src="{% if site.hero_image %}{% img_src site.hero_image 400 %}{% else %}{% static 'images/hero/hero-banner.jpg' %}{% endif %}"><span class="form-text">{% if site.hero_image %}Uploaded photo{% else %}Placeholder photo (CC0){% endif %}</span></div>
     <div class="col-md-6">{% include "includes/field.html" with field=form.cta_heading wrapper_class="mb-0" %}</div>
     <div class="col-md-6">{% include "includes/field.html" with field=form.cta_text wrapper_class="mb-0" %}</div>
     <div class="col-12">{% include "includes/field.html" with field=form.footer_about wrapper_class="mb-0" %}</div>

@@ -75,6 +75,23 @@ class UnderOfferTests(TestCase):
         self.assertIn(prop, self.client.get("/buy/").context["properties"])
 
 
+class HeroBannerTests(TestCase):
+    def test_placeholder_until_a_banner_is_uploaded(self):
+        from apps.core.models import SiteSetting
+
+        html = self.client.get("/").content.decode()
+        self.assertIn("images/hero/hero-banner.jpg", html)
+        self.assertIn("hero-banner-sm.webp", html)  # phone background
+        site = SiteSetting.load()
+        site.hero_image = "site/2026/11/banner.jpg"
+        site.hero_image_alt = "Our office building"
+        site.save()
+        html = self.client.get("/").content.decode()
+        self.assertIn("/media/site/2026/11/banner.jpg", html)
+        self.assertIn('alt="Our office building"', html)
+        self.assertNotIn("images/hero/hero-banner.jpg", html)
+
+
 class PropertyDeleteTests(TestCase):
     """HM-040: delete needs permission and a confirmation step."""
 

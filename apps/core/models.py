@@ -3,6 +3,8 @@ from django.core.cache import cache
 from django.core.validators import RegexValidator
 from django.db import models
 
+from .utils import safe_upload_path
+
 SITE_SETTINGS_CACHE_KEY = "hm:site-settings"
 
 
@@ -63,6 +65,12 @@ class SiteSetting(TimeStampedModel):
         max_length=240,
         default="Buy, rent or sell property in Faridabad and Delhi NCR with honest advice from a local team.",
     )
+    hero_image = models.ImageField(
+        "Banner image", upload_to=safe_upload_path("site"), blank=True,
+        help_text="Home page banner photo (landscape, at least 1200 px wide). Leave empty to use the placeholder photo.",
+    )
+    hero_image_alt = models.CharField("Banner image description", max_length=160, blank=True,
+                                      help_text="Describe the photo for screen readers, e.g. 'Family home with a garden in Faridabad'.")
     cta_heading = models.CharField(max_length=120, default="Ready to list your property?")
     cta_text = models.CharField(
         max_length=240,

@@ -592,7 +592,7 @@ def user_password(request, pk):
 def site_settings(request):
     site = SiteSetting.load()
     site = SiteSetting.objects.get(pk=site.pk)  # fresh copy, not the cached one
-    form = SiteSettingForm(request.POST or None, instance=site)
+    form = SiteSettingForm(request.POST or None, request.FILES or None, instance=site)
     if request.method == "POST" and form.is_valid():
         form.save()
         log_action(request, AuditLog.Action.SETTINGS, site, f"Changed: {', '.join(form.changed_data)}"[:300])
