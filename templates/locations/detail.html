@@ -10,7 +10,7 @@
       <li class="breadcrumb-item active" aria-current="page">{{ place.name }}</li>
     </ol></nav>
     <h1 class="mb-1">Property in {{ place.name }}{% if locality %}, {{ city.name }}{% endif %}</h1>
-    <p class="text-meta mb-3">{{ page_obj.paginator.count }} approved listing{{ page_obj.paginator.count|pluralize }}{% if sale_count or rent_count %} · {{ sale_count }} for sale · {{ rent_count }} for rent/lease{% endif %}</p>
+    <p class="text-meta mb-3">{{ page_obj.paginator.count }} approved listing{{ page_obj.paginator.count|pluralize }}{% if sale_count or rent_count %}: {{ sale_count }} for sale, {{ rent_count }} for rent/lease{% endif %}</p>
     <div class="d-flex gap-2 flex-wrap">
       <a class="btn btn-secondary-hm btn-sm" href="{% url 'properties:buy_city' city.slug %}{% if locality %}?locality={{ locality.pk }}{% endif %}">Buy in {{ place.name }}</a>
       <a class="btn btn-secondary-hm btn-sm" href="{% url 'properties:rent_city' city.slug %}{% if locality %}?locality={{ locality.pk }}{% endif %}">Rent in {{ place.name }}</a>

@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}{{ project.seo_title|default:project.name }}{% if not project.seo_title %} – {{ project.location_label }}{% endif %} | {{ brand_short }}{% endblock %}
+{% block title %}{{ project.seo_title|default:project.name }}{% if not project.seo_title %}, {{ project.location_label }}{% endif %} | {{ brand_short }}{% endblock %}
 {% block meta_description %}{{ project.seo_description|default:project.description|truncatechars:160 }}{% endblock %}
 {% block body_class %}has-mobile-cta{% endblock %}
 {% block content %}
-{% if preview %}<div class="preview-banner"><div class="container">Preview – this project is not published.</div></div>{% endif %}
+{% if preview %}<div class="preview-banner"><div class="container">Preview: this project is not published.</div></div>{% endif %}
 <div class="container pt-3 pb-5">
   <nav aria-label="Breadcrumb"><ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
@@ -20,10 +20,10 @@
   <div class="row g-4 mt-1">
     <div class="col-lg-8">
       <h1 class="mb-1">{{ project.name }}</h1>
-      <p class="text-meta">{% icon "map-pin" 16 %} {{ project.location_label }}{% if project.builder_name %} · By {{ project.builder_name }}{% endif %}</p>
+      <p class="text-meta">{% icon "map-pin" 16 %} {{ project.location_label }}{% if project.builder_name %}, by {{ project.builder_name }}{% endif %}</p>
       <section class="hm-card hm-card-body mb-4">
         <div class="fact-grid">
-          <div class="fact"><small>Price</small><strong>{% if project.price_from %}{{ project.price_from|inr_short }}{% if project.price_to %} – {{ project.price_to|inr_short }}{% endif %}{% else %}On request{% endif %}</strong></div>
+          <div class="fact"><small>Price</small><strong>{% if project.price_from %}{{ project.price_from|inr_short }}{% if project.price_to %} to {{ project.price_to|inr_short }}{% endif %}{% else %}On request{% endif %}</strong></div>
           {% if project.configurations %}<div class="fact"><small>Configurations</small><strong>{{ project.configurations }}</strong></div>{% endif %}
           <div class="fact"><small>Status</small><strong>{{ project.get_status_display }}</strong></div>
           {% if project.possession_date %}<div class="fact"><small>Possession</small><strong>{{ project.possession_date|date:"M Y" }}</strong></div>{% endif %}

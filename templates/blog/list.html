@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{% if category %}{{ category.name }} – {% endif %}Property guides &amp; news{% if page_obj.number > 1 %} – page {{ page_obj.number }}{% endif %} | {{ brand_short }}{% endblock %}
+{% block title %}{% if category %}{{ category.name }}: {% endif %}Property guides &amp; news{% if page_obj.number > 1 %}, page {{ page_obj.number }}{% endif %} | {{ brand_short }}{% endblock %}
 {% block meta_description %}{% if category.description %}{{ category.description }}{% else %}Buying guides, rental tips and local insights on Faridabad and Delhi NCR real estate from {{ site.brand_name }}.{% endif %}{% endblock %}
 {% block content %}
 <div class="page-hero">
@@ -29,7 +29,7 @@
         <span class="hm-badge hm-badge-featured align-self-start mb-2">Featured</span>
         <h2><a class="stretched-link text-decoration-none text-ink" href="{{ featured.get_absolute_url }}">{{ featured.title }}</a></h2>
         <p class="text-meta">{{ featured.excerpt }}</p>
-        <p class="post-meta mb-0">{{ featured.published_at|date:"j M Y" }} · {{ featured.reading_minutes }} min read</p>
+        <p class="post-meta mb-0">{{ featured.published_at|date:"j M Y" }}, {{ featured.reading_minutes }} min read</p>
       </div>
     </div>
   </article>

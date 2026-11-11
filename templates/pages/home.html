@@ -9,243 +9,215 @@
 {% endblock %}
 
 {% block content %}
+{# 1. Hero: the search is the action, the home photo beside it #}
 {% static 'images/hero/hero-banner-sm.webp' as hero_mobile %}<section class="hero" aria-labelledby="hero-title" style="--hero-img: url('{% if site.hero_image %}{% img_src site.hero_image 800 %}{% else %}{{ hero_mobile }}{% endif %}')">
   <div class="container">
-    <div class="row align-items-center g-4">
-      <div class="col-lg-7">
-        {% if site.tagline_hindi %}<p class="tagline" lang="hi">{{ site.tagline_hindi }}</p>{% endif %}
+    <div class="hero-grid">
+      <div>
         <h1 id="hero-title">{{ site.hero_heading }}</h1>
-        <p class="lead mt-3">{{ site.hero_subheading }}</p>
-        <div class="hero-points">
-          <span>{% icon "shield-check" 18 %} Every listing reviewed before it goes live</span>
-          <span>{% icon "user" 18 %} Owner details kept private</span>
-          <span>{% icon "map-pin" 18 %} Local Faridabad &amp; NCR team</span>
-        </div>
+        <p class="lead">{{ site.hero_subheading }}</p>
+        <form class="search-panel" method="get" action="{% url 'properties:buy' %}" data-home-search data-clean-get role="search" aria-label="Property search">
+          <div class="nav search-tabs" role="group" aria-label="What are you looking for?">
+            <button type="button" class="nav-link active" aria-pressed="true" data-search-tab data-action="{% url 'properties:buy' %}" data-budget="sale">Buy</button>
+            <button type="button" class="nav-link" aria-pressed="false" data-search-tab data-action="{% url 'properties:rent' %}" data-budget="rent">Rent</button>
+            <button type="button" class="nav-link" aria-pressed="false" data-search-tab data-action="{% url 'properties:commercial' %}" data-budget="sale">Commercial</button>
+            <a class="nav-link d-none d-sm-block" href="{% url 'properties:projects' %}">New Projects</a>
+          </div>
+          <div class="row g-2 align-items-end">
+            <div class="col-sm-6">
+              <label class="search-label" for="hs-city">City</label>
+              <select class="form-select" id="hs-city" name="city">
+                <option value="">All cities</option>
+                {% for c in search_cities %}<option value="{{ c.slug }}" {% if c.slug == 'faridabad' %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label class="search-label" for="hs-q">Locality or project</label>
+              <input class="form-control" id="hs-q" type="search" name="q" maxlength="100" placeholder="Locality, project or landmark">
+            </div>
+            <div class="col-6 col-sm-4">
+              <label class="search-label" for="hs-type">Property type</label>
+              <select class="form-select" id="hs-type" name="type">
+                <option value="">Any type</option>
+                {% for t in property_types %}<option value="{{ t.slug }}">{{ t.name }}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="col-6 col-sm-4">
+              <label class="search-label" for="hs-budget">Budget</label>
+              <select class="form-select" id="hs-budget" name="budget">
+                {% for value, label in sale_budgets %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="col-12 col-sm-4">
+              <button type="submit" class="btn btn-primary btn-search">{% icon "search" 18 %} Search</button>
+            </div>
+          </div>
+          {% if popular_localities %}
+          <div class="popular-chips"><span>Popular:</span>
+            {% for loc in popular_localities %}<a class="chip" href="{{ loc.get_absolute_url }}">{{ loc.name }}</a>{% endfor %}
+            <a class="chip" href="{% url 'properties:buy' %}?construction=ready">Ready to move</a>
+          </div>
+          {% endif %}
+        </form>
       </div>
-      <div class="col-lg-5 d-none d-lg-block">
-        <figure class="hero-banner">
-          {# A 1x1 source below 992px stops phones downloading this hidden desktop image; phones get the small background instead. #}
-          <picture>
-            <source media="(max-width: 991.98px)" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-            {% if site.hero_image %}
-            <img src="{% img_src site.hero_image 1200 %}" srcset="{% img_srcset site.hero_image '800,1200,1600' %}" sizes="(min-width: 1200px) 500px, 40vw" alt="{{ site.hero_image_alt|default:site.hero_heading }}" width="1200" height="900" fetchpriority="high">
-            {% else %}
-            <source type="image/webp" srcset="{% static 'images/hero/hero-banner.webp' %}">
-            <img src="{% static 'images/hero/hero-banner.jpg' %}" alt="{{ site.hero_image_alt|default:'Family home with a front garden' }}" width="1024" height="768" fetchpriority="high">
-            {% endif %}
-          </picture>
-          <figcaption class="hero-banner-tag">{% icon "apartment" 16 %} Buy · Rent · Sell</figcaption>
-        </figure>
-      </div>
+      <figure class="hero-banner">
+        {# A 1x1 source below 992px stops phones downloading this hidden desktop image; phones get the small background instead. #}
+        <picture>
+          <source media="(max-width: 991.98px)" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+          {% if site.hero_image %}
+          <img src="{% img_src site.hero_image 1200 %}" srcset="{% img_srcset site.hero_image '800,1200,1600' %}" sizes="(min-width: 1440px) 560px, 40vw" alt="{{ site.hero_image_alt|default:site.hero_heading }}" width="1200" height="900" fetchpriority="high">
+          {% else %}
+          <source type="image/webp" srcset="{% static 'images/hero/hero-banner.webp' %}">
+          <img src="{% static 'images/hero/hero-banner.jpg' %}" alt="{{ site.hero_image_alt|default:'Family home with a front garden' }}" width="1024" height="768" fetchpriority="high">
+          {% endif %}
+        </picture>
+        {% if site.tagline_hindi %}<figcaption lang="hi">{{ site.tagline_hindi }}</figcaption>{% endif %}
+      </figure>
     </div>
   </div>
 </section>
-
-<div class="container">
-  <form class="search-panel" method="get" action="{% url 'properties:buy' %}" data-home-search data-clean-get role="search" aria-label="Property search">
-    <div class="nav search-tabs" role="group" aria-label="What are you looking for?">
-      <button type="button" class="nav-link active" aria-pressed="true" data-search-tab data-action="{% url 'properties:buy' %}" data-budget="sale">Buy</button>
-      <button type="button" class="nav-link" aria-pressed="false" data-search-tab data-action="{% url 'properties:rent' %}" data-budget="rent">Rent</button>
-      <button type="button" class="nav-link" aria-pressed="false" data-search-tab data-action="{% url 'properties:commercial' %}" data-budget="sale">Commercial</button>
-      <a class="nav-link d-none d-sm-block" href="{% url 'properties:projects' %}">New Projects</a>
-    </div>
-    <div class="row g-2 g-md-3 align-items-end">
-      <div class="col-md-3">
-        <label class="search-label" for="hs-city">City</label>
-        <select class="form-select" id="hs-city" name="city">
-          <option value="">All cities</option>
-          {% for c in search_cities %}<option value="{{ c.slug }}" {% if c.slug == 'faridabad' %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
-        </select>
-      </div>
-      <div class="col-md-3">
-        <label class="search-label" for="hs-q">Locality or project</label>
-        <input class="form-control" id="hs-q" type="search" name="q" maxlength="100" placeholder="Locality, project or landmark">
-      </div>
-      <div class="col-6 col-md-2">
-        <label class="search-label" for="hs-type">Property type</label>
-        <select class="form-select" id="hs-type" name="type">
-          <option value="">Any type</option>
-          {% for t in property_types %}<option value="{{ t.slug }}">{{ t.name }}</option>{% endfor %}
-        </select>
-      </div>
-      <div class="col-6 col-md-2">
-        <label class="search-label" for="hs-budget">Budget</label>
-        <select class="form-select" id="hs-budget" name="budget">
-          {% for value, label in sale_budgets %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-        </select>
-      </div>
-      <div class="col-md-2 col-12">
-        <button type="submit" class="btn btn-primary btn-search">{% icon "search" 18 %} Search</button>
-      </div>
-    </div>
-    {% if popular_localities %}
-    <div class="popular-chips"><span>Popular:</span>
-      {% for loc in popular_localities %}<a class="chip" href="{{ loc.get_absolute_url }}">{{ loc.name }}</a>{% endfor %}
-      <a class="chip" href="{% url 'properties:buy' %}?construction=ready">Ready to move</a>
-    </div>
-    {% endif %}
-  </form>
-</div>
 {{ budget_presets|json_script:"budget-presets" }}
 
-<section class="section" aria-labelledby="types-title">
+{# 2. Listings: one section, switched between featured, latest and projects #}
+{% if featured or latest or projects %}
+<section class="section" aria-labelledby="listings-title" data-switcher>
   <div class="container">
-    <div class="section-head"><div><h2 id="types-title">Browse by property type</h2><p>Homes, plots and commercial spaces</p></div></div>
-    <div class="row g-3">
-      {% for t in tiles %}<div class="col-6 col-md-3 col-xl-3"><a class="tile-link" href="{{ t.url }}"><img src="{% static 'images/tiles/tile-'|add:t.tile|add:'.svg' %}" alt="" width="64" height="64" loading="lazy">{{ t.label }}</a></div>{% endfor %}
+    <div class="listings-head">
+      <div><h2 id="listings-title">On the market now</h2><p class="text-meta lead mb-0 mt-2">Every listing is checked by our team before it goes live.</p></div>
+      <div class="switcher" role="tablist" aria-label="Listings" hidden>
+        {% if featured %}<button type="button" role="tab" id="tab-featured" aria-controls="panel-featured" aria-selected="false">Handpicked</button>{% endif %}
+        {% if latest %}<button type="button" role="tab" id="tab-latest" aria-controls="panel-latest" aria-selected="false">Latest</button>{% endif %}
+        {% if projects %}<button type="button" role="tab" id="tab-projects" aria-controls="panel-projects" aria-selected="false">New projects</button>{% endif %}
+      </div>
     </div>
-  </div>
-</section>
-
-{% if featured %}
-<section class="section pt-0" aria-labelledby="featured-title">
-  <div class="container">
-    <div class="section-head">
-      <div><h2 id="featured-title">Handpicked for you</h2><p>Featured listings reviewed by our team</p></div>
-      <a class="btn btn-ghost" href="{% url 'properties:list' %}?sort=featured">View all</a>
+    {% if featured %}
+    <div class="switch-panel" id="panel-featured" role="tabpanel" aria-labelledby="tab-featured">
+      <h3 class="mb-4" data-switch-title>Handpicked for you</h3>
+      <div class="row g-3 g-lg-4">{% for p in featured %}<div class="col-sm-6 col-lg-3">{% include "includes/property_card.html" with eager=forloop.first %}</div>{% endfor %}</div>
+      <a class="btn btn-secondary-hm see-all" href="{% url 'properties:list' %}?sort=featured">View all featured</a>
     </div>
-    <div class="row g-3 g-lg-4">{% for p in featured %}<div class="col-sm-6 col-lg-3">{% include "includes/property_card.html" with eager=forloop.first %}</div>{% endfor %}</div>
+    {% endif %}
+    {% if latest %}
+    <div class="switch-panel" id="panel-latest" role="tabpanel" aria-labelledby="tab-latest">
+      <h3 class="mb-4" data-switch-title>Latest listings</h3>
+      <div class="row g-3 g-lg-4">{% for p in latest %}<div class="col-sm-6 col-lg-3">{% include "includes/property_card.html" %}</div>{% endfor %}</div>
+      <a class="btn btn-secondary-hm see-all" href="{% url 'properties:list' %}">See all properties</a>
+    </div>
+    {% endif %}
+    {% if projects %}
+    <div class="switch-panel" id="panel-projects" role="tabpanel" aria-labelledby="tab-projects">
+      <h3 class="mb-4" data-switch-title>New projects</h3>
+      <div class="row g-3 g-lg-4">{% for project in projects %}<div class="col-md-6 col-lg-4">{% include "includes/project_card.html" %}</div>{% endfor %}</div>
+      <a class="btn btn-secondary-hm see-all" href="{% url 'properties:projects' %}">All projects</a>
+    </div>
+    {% endif %}
   </div>
 </section>
 {% endif %}
 
-{% if highlights %}
+{# 3. Browse: by type and by place #}
+<section class="section bg-paper" aria-labelledby="types-title">
+  <div class="container">
+    <div class="browse-grid">
+      <div>
+        <h2 id="types-title" class="mb-4">Browse by property type</h2>
+        <ul class="type-list">
+          {% for t in tiles %}<li><a href="{{ t.url }}"><img src="{% static 'images/tiles/tile-'|add:t.tile|add:'.svg' %}" alt="" width="40" height="40" loading="lazy">{{ t.label }}</a></li>{% endfor %}
+        </ul>
+      </div>
+      {% if cities %}
+      <div>
+        <h2 id="cities-title" class="mb-4">Explore by location</h2>
+        <ul class="place-index">
+          {% for c in cities %}<li><a href="{{ c.get_absolute_url }}"><strong>{{ c.name }}</strong><span>{% if c.listing_count %}{{ c.listing_count }} listing{{ c.listing_count|pluralize }}{% else %}Enquire with us{% endif %}</span></a></li>{% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{# 4. Trust: one statement, plain facts, client words #}
+{% if highlights or testimonials %}
 <section class="section" aria-labelledby="why-title">
   <div class="container">
-    <div class="row g-4 align-items-center">
-      <div class="col-lg-4"><h2 id="why-title">Why choose {{ site.brand_name }}</h2><p class="text-meta">{{ site.tagline_english }} We keep property search simple, honest and local.</p><a class="btn btn-secondary-hm mt-2" href="{% url 'pages:about' %}">About us</a></div>
-      <div class="col-lg-8"><div class="row g-4">
-        {% for h in highlights %}<div class="col-sm-6"><div class="feature"><span class="feature-icon">{% icon h.icon 22 %}</span><div><h3>{{ h.title }}</h3><p>{{ h.text }}</p></div></div></div>{% endfor %}
-      </div></div>
+    <h2 id="why-title" class="statement">Why choose {{ site.brand_name }}</h2>
+    <p class="lead text-meta mt-3">{{ site.tagline_english }} We keep property search simple, honest and local.</p>
+    <a class="btn btn-secondary-hm mt-2" href="{% url 'pages:about' %}">About us</a>
+    {% if highlights %}
+    <dl class="facts">
+      {% for h in highlights %}<div><dt>{{ h.title }}</dt><dd>{{ h.text }}</dd></div>{% endfor %}
+    </dl>
+    {% endif %}
+    {% if testimonials %}
+    <h3 id="testimonials-title" class="mt-5 mb-4">What our clients say</h3>
+    <div class="row g-3 g-lg-4">
+      {% for t in testimonials %}<div class="col-md-4"><figure class="hm-card hm-card-body h-100 mb-0"><blockquote class="mb-3 text-ink">“{{ t.quote }}”</blockquote><figcaption class="fw-semibold text-ink">{{ t.name }}{% if t.location %}<span class="text-meta fw-normal">, {{ t.location }}</span>{% endif %}</figcaption></figure></div>{% endfor %}
     </div>
+    {% endif %}
   </div>
 </section>
 {% endif %}
 
-{% if cities %}
-<section class="section pt-0" aria-labelledby="cities-title">
-  <div class="container">
-    <div class="section-head"><div><h2 id="cities-title">Explore by location</h2><p>Faridabad and Delhi NCR</p></div></div>
-    <div class="row g-3">
-      {% for c in cities %}
-      <div class="col-6 col-md-4 col-lg-2">
-        <a class="city-link" href="{{ c.get_absolute_url }}"><span class="city-icon">{% icon "apartment" 20 %}</span><span><strong>{{ c.name }}</strong><small>{% if c.listing_count %}{{ c.listing_count }} listing{{ c.listing_count|pluralize }}{% else %}Enquire with us{% endif %}</small></span></a>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-{% endif %}
-
-{% if latest %}
-<section class="section bg-white border-top border-bottom" aria-labelledby="latest-title">
-  <div class="container">
-    <div class="section-head">
-      <div><h2 id="latest-title">Latest listings</h2><p>Recently approved properties</p></div>
-      <a class="btn btn-ghost" href="{% url 'properties:list' %}">See all properties</a>
-    </div>
-    <div class="row g-3 g-lg-4">{% for p in latest %}<div class="col-sm-6 col-lg-3">{% include "includes/property_card.html" %}</div>{% endfor %}</div>
-  </div>
-</section>
-{% endif %}
-
-
-
-
-
-
-
+{# 5. Services: rows #}
 {% if services %}
-<section class="section bg-cream" aria-labelledby="services-title">
+<section class="section bg-paper" aria-labelledby="services-title">
   <div class="container">
-    <div class="section-head"><div><h2 id="services-title">Our services</h2><p>End-to-end help for buyers, sellers, landlords and tenants</p></div><a class="btn btn-ghost" href="{% url 'pages:services' %}">All services</a></div>
-    <div class="row g-3 g-lg-4">
-      {% for s in services %}<div class="col-sm-6 col-lg-4"><div class="service-card"><span class="feature-icon">{% icon s.icon 24 %}</span><h3>{{ s.title }}</h3><p class="text-meta mb-0">{{ s.summary }}</p></div></div>{% endfor %}
+    <div class="rows-grid">
+      <div>
+        <h2 id="services-title">Our services</h2>
+        <p class="text-meta mt-3">Help for buyers, sellers, landlords and tenants.</p>
+        <a class="btn btn-secondary-hm mt-2" href="{% url 'pages:services' %}">All services</a>
+      </div>
+      <ul class="rows">
+        {% for s in services %}<li><h3>{{ s.title }}</h3><p>{{ s.summary }}</p></li>{% endfor %}
+      </ul>
     </div>
   </div>
 </section>
 {% endif %}
 
-<section class="section" aria-labelledby="steps-title">
-  <div class="container">
-    <h2 id="steps-title" class="mb-4">How it works</h2>
-    <div class="row g-3 g-lg-4">
-      <div class="col-md-4"><div class="step-card"><div class="step-num" aria-hidden="true">1</div><h3>Search &amp; shortlist</h3><p class="text-meta mb-0">Filter by city, locality, budget and BHK to find properties that fit.</p></div></div>
-      <div class="col-md-4"><div class="step-card"><div class="step-num" aria-hidden="true">2</div><h3>Send an enquiry</h3><p class="text-meta mb-0">Share your requirement online, on WhatsApp or by phone. Our team gets back to you.</p></div></div>
-      <div class="col-md-4"><div class="step-card"><div class="step-num" aria-hidden="true">3</div><h3>Visit &amp; decide</h3><p class="text-meta mb-0">We arrange site visits and help you check documents before you commit.</p></div></div>
-    </div>
-  </div>
-</section>
-
-{% if projects %}
-<section class="section pt-0" aria-labelledby="projects-title">
-  <div class="container">
-    <div class="section-head"><div><h2 id="projects-title">New projects</h2><p>New launches and under-construction projects</p></div><a class="btn btn-ghost" href="{% url 'properties:projects' %}">All projects</a></div>
-    <div class="row g-3 g-lg-4">{% for project in projects %}<div class="col-md-6 col-lg-4">{% include "includes/project_card.html" %}</div>{% endfor %}</div>
-  </div>
-</section>
-{% endif %}
-
-{% if testimonials %}
-<section class="section bg-mist" aria-labelledby="testimonials-title">
-  <div class="container">
-    <h2 id="testimonials-title" class="mb-4">What our clients say</h2>
-    <div class="row g-3 g-lg-4">
-      {% for t in testimonials %}<div class="col-md-4"><figure class="hm-card hm-card-body h-100 mb-0"><blockquote class="mb-3">“{{ t.quote }}”</blockquote><figcaption class="fw-semibold text-ink">{{ t.name }}{% if t.location %}<span class="text-meta fw-normal">, {{ t.location }}</span>{% endif %}</figcaption></figure></div>{% endfor %}
-    </div>
-  </div>
-</section>
-{% endif %}
-
+{# 6. Blog #}
 {% if posts %}
 <section class="section" aria-labelledby="blog-title">
   <div class="container">
-    <div class="section-head"><div><h2 id="blog-title">From our blog</h2><p>Guides for buyers, sellers and tenants</p></div><a class="btn btn-ghost" href="{% url 'blog:list' %}">Read all articles</a></div>
+    <div class="section-head"><div><h2 id="blog-title">From our blog</h2><p>Guides for buyers, sellers and tenants</p></div><a class="btn btn-secondary-hm" href="{% url 'blog:list' %}">Read all articles</a></div>
     <div class="row g-3 g-lg-4">{% for post in posts %}<div class="col-md-4">{% include "includes/post_card.html" %}</div>{% endfor %}</div>
   </div>
 </section>
 {% endif %}
 
+{# 7. FAQ: native disclosure rows #}
 {% if faqs %}
 <section class="section pt-0" aria-labelledby="faq-title">
-  <div class="container" style="max-width:900px">
-    <h2 id="faq-title" class="mb-4 text-center">Frequently asked questions</h2>
-    <div class="accordion" id="homeFaq">
-      {% for f in faqs %}
-      <div class="accordion-item">
-        <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ f.pk }}" aria-expanded="false" aria-controls="faq{{ f.pk }}">{{ f.question }}</button></h3>
-        <div id="faq{{ f.pk }}" class="accordion-collapse collapse" data-bs-parent="#homeFaq"><div class="accordion-body">{{ f.answer|rich_text }}</div></div>
-      </div>
-      {% endfor %}
+  <div class="container">
+    <div class="section-head"><h2 id="faq-title">Frequently asked questions</h2><a class="btn btn-secondary-hm" href="{% url 'pages:faq' %}">See all FAQs</a></div>
+    <div class="faq-body">
+      {% for f in faqs %}<details class="faq-row"><summary>{{ f.question }}</summary><div class="faq-answer">{{ f.answer|rich_text }}</div></details>{% endfor %}
     </div>
-    <p class="text-center mt-3"><a href="{% url 'pages:faq' %}">See all FAQs</a></p>
   </div>
 </section>
 {% endif %}
 
-<section class="section pt-0">
+{# 8. Close: list your property, or ask for a call #}
+<section class="close-band" aria-labelledby="cta-title">
   <div class="container">
-    <div class="cta-band">
-      <img class="cta-seal" src="{% static 'images/brand/logo-seal.svg' %}" alt="" loading="lazy">
-      <div class="row g-4 align-items-center position-relative">
-        <div class="col-lg-6">
-          <h2>{{ site.cta_heading }}</h2>
-          <p class="text-meta">{{ site.cta_text }}</p>
-          <div class="d-flex gap-2 flex-wrap">
-            <a class="btn btn-post btn-lg" href="{% url 'properties:post_property' %}">{% icon "plus" 18 %} Post Property FREE</a>
-            {% if site.phone %}<a class="btn btn-secondary-hm btn-lg" href="tel:{{ site.phone_href }}">{% icon "phone" 18 %} {{ site.phone }}</a>{% endif %}
-          </div>
+    <div class="close-grid">
+      <div>
+        <h2 id="cta-title">{{ site.cta_heading }}</h2>
+        <p class="lead text-meta mt-3">{{ site.cta_text }}</p>
+        <div class="d-flex gap-2 flex-wrap mt-4">
+          <a class="btn btn-post btn-lg" href="{% url 'properties:post_property' %}">{% icon "plus" 18 %} Post your property free</a>
+          {% if site.phone %}<a class="btn btn-secondary-hm btn-lg" href="tel:{{ site.phone_href }}">{% icon "phone" 18 %} {{ site.phone }}</a>{% endif %}
         </div>
-        <div class="col-lg-5 offset-lg-1">
-          <div class="hm-card hm-card-body">
-            <h3 class="h5">Request a callback</h3>
-            <form method="post" action="{% url 'leads:callback' %}" novalidate>
-              {% csrf_token %}<input type="hidden" name="next" value="{% url 'core:home' %}">
-              {% for field in callback_form %}{% include "includes/field.html" %}{% endfor %}
-              <button class="btn btn-primary w-100" type="submit">Call me back</button>
-            </form>
-          </div>
-        </div>
+      </div>
+      <div class="close-form">
+        <h3>Request a callback</h3>
+        <form method="post" action="{% url 'leads:callback' %}" novalidate>
+          {% csrf_token %}<input type="hidden" name="next" value="{% url 'core:home' %}">
+          {% for field in callback_form %}{% include "includes/field.html" %}{% endfor %}
+          <button class="btn btn-primary w-100" type="submit">Call me back</button>
+        </form>
       </div>
     </div>
   </div>

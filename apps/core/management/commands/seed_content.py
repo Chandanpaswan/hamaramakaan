@@ -53,10 +53,10 @@ PAGES = [
      "## Our mission\n"
      "Help every family buy, rent or sell property with trust, transparency and zero hassle.\n\n"
      "## Our values\n"
-     "- **Honest by default** – accurate listings and straightforward advice.\n"
-     "- **Family first** – we treat every client’s home decision as our own.\n"
-     "- **Local expertise** – we know the sectors, societies and builders we work with.\n"
-     "- **Simple to the keys** – from the first call to the final paperwork.\n\n"
+     "- **Honest by default.** Accurate listings and straightforward advice.\n"
+     "- **Family first.** We treat every client’s home decision as our own.\n"
+     "- **Local expertise.** We know the sectors, societies and builders we work with.\n"
+     "- **Simple to the keys.** From the first call to the final paperwork.\n\n"
      "## Where we work\n"
      "Our focus is Faridabad and the wider Delhi NCR. Contact us to discuss your requirement."),
     ("Services", "services", False, "How we can help you buy, sell, rent or lease property.", ""),
@@ -99,7 +99,7 @@ SERVICES = [
 HIGHLIGHTS = [
     ("Every listing reviewed", "Our team reviews each property before it is published on the website.", "shield-check"),
     ("Local know-how", "Practical knowledge of Faridabad sectors, societies and builders.", "map-pin"),
-    ("Clear communication", "Straight answers on price, paperwork and timelines – no hidden surprises.", "message-circle"),
+    ("Clear communication", "Straight answers on price, paperwork and timelines, with no hidden surprises.", "message-circle"),
     ("Your details stay private", "Owner phone numbers and addresses are never shown publicly without consent.", "user"),
 ]
 

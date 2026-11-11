@@ -28,6 +28,32 @@
     });
   }
 
+  // Home listings switcher: without JS every panel shows, stacked under its own heading.
+  document.querySelectorAll("[data-switcher]").forEach(function (section) {
+    var tabs = section.querySelectorAll("[role=tab]");
+    if (tabs.length < 2) return;
+    section.setAttribute("data-switching", "");
+    section.querySelector("[role=tablist]").hidden = false;
+    section.querySelectorAll("[data-switch-title]").forEach(function (h) { h.classList.add("visually-hidden"); });
+    function select(tab, focus) {
+      tabs.forEach(function (t) {
+        var on = t === tab;
+        t.setAttribute("aria-selected", on ? "true" : "false");
+        t.tabIndex = on ? 0 : -1;
+        document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+      });
+      if (focus) tab.focus();
+    }
+    tabs.forEach(function (tab, i) {
+      tab.addEventListener("click", function () { select(tab); });
+      tab.addEventListener("keydown", function (e) {
+        var step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (step) { e.preventDefault(); select(tabs[(i + step + tabs.length) % tabs.length], true); }
+      });
+    });
+    select(tabs[0]);
+  });
+
   // Auto-submit selects marked with data-autosubmit (e.g. sort order).
   document.querySelectorAll("[data-autosubmit]").forEach(function (el) {
     el.addEventListener("change", function () { el.form && el.form.submit(); });

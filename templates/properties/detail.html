@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ property.seo_title|default:property.title }}{% if not property.seo_title %}, {{ property.city.name }}{% endif %} | {{ brand_short }}{% endblock %}
 {% block meta_description %}{% if property.seo_description %}{{ property.seo_description }}{% else %}{{ property.title }} for {{ property.get_purpose_display|lower }} in {{ property.location_label }}{% if property.price %} at {{ property.price|inr_short }}{% endif %}. {{ property.area|num }} {{ property.get_area_unit_display }}. Listing ID {{ property.listing_id }}.{% endif %}{% endblock %}
-{% block og_title %}{{ property.title }} – {{ property.location_label }}{% endblock %}
+{% block og_title %}{{ property.title }}, {{ property.location_label }}{% endblock %}
 {% block og_image %}{% with img=images.0 %}{% if img %}{% absolute_url img.image.url %}{% else %}{{ block.super }}{% endif %}{% endwith %}{% endblock %}
 {% block structured_data %}
 <script type="application/ld+json">
@@ -11,7 +11,7 @@
 {% block body_class %}has-mobile-cta{% endblock %}
 
 {% block content %}
-{% if preview %}<div class="preview-banner"><div class="container">Preview – this listing is “{{ property.get_status_display }}” and not visible to the public. <a href="{% url 'dashboard:property_detail' property.pk %}">Back to dashboard</a></div></div>{% endif %}
+{% if preview %}<div class="preview-banner"><div class="container">Preview: this listing is “{{ property.get_status_display }}” and not visible to the public. <a href="{% url 'dashboard:property_detail' property.pk %}">Back to dashboard</a></div></div>{% endif %}
 <div class="container pt-3 pb-5">
   {% include "includes/breadcrumbs.html" %}
 
@@ -28,7 +28,7 @@
     {% else %}
       <div class="g-item g-main">
         <span class="g-badges">{% if property.is_sample %}<span class="hm-badge hm-badge-sample">Sample listing</span>{% endif %}{% if property.rera_number %}<span class="hm-badge hm-badge-rera">RERA registered</span>{% endif %}</span>
-        {% include "includes/placeholder_art.html" with kind=property.property_type.illustration uid="main" label="Illustration – photos coming soon" %}
+        {% include "includes/placeholder_art.html" with kind=property.property_type.illustration uid="main" label="Illustration, photos coming soon" %}
       </div>
     {% endif %}
   </div>
@@ -46,13 +46,13 @@
           </div>
           <h1 class="mb-1">{{ property.title }}</h1>
           <p class="text-meta mb-0 d-flex gap-1 align-items-center">{% icon "map-pin" 16 %} {% if property.show_address and property.address %}{{ property.address }}{% else %}{% if property.project_name %}{{ property.project_name }}, {% endif %}{{ property.location_label }}{% endif %}</p>
-          <p class="small text-meta mb-0 mt-1">Listing ID: <strong class="text-ink">{{ property.listing_id }}</strong>{% if property.published_at %} · Posted {{ property.published_at|ago }}{% endif %}</p>
+          <p class="small text-meta mb-0 mt-1">Listing ID: <strong class="text-ink">{{ property.listing_id }}</strong>{% if property.published_at %}, posted {{ property.published_at|ago }}{% endif %}</p>
         </div>
         <div class="text-lg-end">
           <div class="detail-price">{% if property.price %}{{ property.price|inr_short }}{% if property.is_rental %}<small class="fs-6 fw-normal text-meta"> / month</small>{% endif %}{% else %}Contact for price{% endif %}</div>
           <p class="small text-meta mb-0">
             {% if property.price %}{{ property.price|inr }}{% endif %}
-            {% if property.price_per_unit %} · ₹ {{ property.price_per_unit|num }}/{{ property.get_area_unit_display }}{% endif %}
+            {% if property.price_per_unit %}, ₹ {{ property.price_per_unit|num }}/{{ property.get_area_unit_display }}{% endif %}
           </p>
           {% if property.price_note %}<p class="small text-meta mb-0">{{ property.price_note }}</p>{% endif %}
         </div>
@@ -61,7 +61,7 @@
       <section class="hm-card hm-card-body mb-4" aria-labelledby="facts-title">
         <h2 id="facts-title" class="visually-hidden">Key details</h2>
         <div class="fact-grid">
-          {% if property.bedrooms %}<div class="fact"><small>Configuration</small><strong>{{ property.bhk_label }}{% if property.bathrooms %} · {{ property.bathrooms }} Bath{{ property.bathrooms|pluralize }}{% endif %}</strong></div>{% endif %}
+          {% if property.bedrooms %}<div class="fact"><small>Configuration</small><strong>{{ property.bhk_label }}{% if property.bathrooms %}, {{ property.bathrooms }} Bath{{ property.bathrooms|pluralize }}{% endif %}</strong></div>{% endif %}
           <div class="fact"><small>Area</small><strong>{{ property.area|num }} {{ property.get_area_unit_display }}</strong></div>
           {% if property.carpet_area %}<div class="fact"><small>Carpet area</small><strong>{{ property.carpet_area|num }} {{ property.get_area_unit_display }}</strong></div>{% endif %}
           {% if property.construction_status %}<div class="fact"><small>Status</small><strong>{{ property.get_construction_status_display }}</strong></div>{% endif %}
