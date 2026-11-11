@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ site.brand_name }} – Property for sale & rent in Faridabad, Delhi NCR{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}{{ site.default_meta_description }}{% endblock %}">
-  {% if noindex %}<meta name="robots" content="noindex, follow">{% endif %}
+  {% if noindex %}<meta name="robots" content="noindex, follow">{% else %}<meta name="robots" content="index, follow, max-image-preview:large">{% endif %}
   <link rel="canonical" href="{% block canonical %}{% absolute_url %}{% endblock %}">
   <meta property="og:site_name" content="{{ site.brand_name }}">
   <meta property="og:type" content="{% block og_type %}website{% endblock %}">
   <meta property="og:title" content="{% block og_title %}{{ site.brand_name }}{% endblock %}">
   <meta property="og:description" content="{% block og_description %}{{ site.default_meta_description }}{% endblock %}">
   <meta property="og:url" content="{% absolute_url %}">
-  <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/brand/social-logo.png' %}{% endblock %}">
+  <meta property="og:image" content="{% block og_image %}{{ canonical_base }}{% static 'images/brand/social-logo.png' %}{% endblock %}">
   <meta name="twitter:card" content="summary_large_image">
   {% if site.search_console_verification %}<meta name="google-site-verification" content="{{ site.search_console_verification }}">{% endif %}
   <link rel="icon" href="{% static 'images/brand/favicon.ico' %}" sizes="any">
@@ -21,7 +21,8 @@
   <meta name="theme-color" content="#0B1F4D">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  {% if site.tagline_hindi %}<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@600&text={{ site.tagline_hindi|urlencode }}&display=swap" rel="stylesheet">{% endif %}
   <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/site.css' %}">
   {% block extra_head %}{% endblock %}

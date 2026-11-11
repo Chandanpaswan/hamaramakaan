@@ -5,7 +5,7 @@ from django import forms
 from django.db.models import Q
 from django.utils import timezone
 
-from apps.core.forms import BootstrapFormMixin, HoneypotMixin, MultipleImageField
+from apps.core.forms import BootstrapFormMixin, HoneypotMixin, MultipleImageField, TelInput
 from apps.locations.models import City, Locality
 
 from .models import Amenity, Category, Property, PropertyType
@@ -199,8 +199,7 @@ class PostPropertyForm(BootstrapFormMixin, HoneypotMixin, forms.ModelForm):
     """Public owner submission. Saved as 'Pending review'; never published automatically."""
 
     owner_name = forms.CharField(label="Your name", max_length=120)
-    owner_phone = forms.CharField(label="Mobile number", max_length=20,
-                                  widget=forms.TextInput(attrs={"inputmode": "tel", "autocomplete": "tel"}))
+    owner_phone = forms.CharField(label="Mobile number", max_length=20, widget=TelInput())
     owner_email = forms.EmailField(label="Email", required=False,
                                    widget=forms.EmailInput(attrs={"autocomplete": "email"}))
     photos = MultipleImageField(label="Property photos", required=False,

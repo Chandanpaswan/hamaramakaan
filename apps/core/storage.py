@@ -16,8 +16,20 @@ import urllib.request
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.base import ContentFile
+from django.contrib.staticfiles.storage import StaticFilesStorage
 from django.core.files.storage import Storage
 from django.utils.deconstruct import deconstructible
+
+
+class VersionedStaticFilesStorage(StaticFilesStorage):
+    """Appends ?v=<git commit> to static URLs (Vercel has no collectstatic/manifest step)."""
+
+    # shortcut: images referenced inside CSS url() are not versioned, rename the file when one changes.
+
+    def url(self, name):
+        url = super().url(name)
+        version = os.environ.get("VERCEL_GIT_COMMIT_SHA", "")[:8]
+        return f"{url}?v={version}" if version else url
 
 API_URL = os.environ.get("VERCEL_BLOB_API_URL", "https://vercel.com/api/blob")
 API_VERSION = "13"

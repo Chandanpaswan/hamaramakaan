@@ -150,6 +150,7 @@ STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
+IMAGE_OPTIMIZATION = False  # Vercel Image Optimization for uploaded photos (enabled in production on Vercel)
 # Uploaded photos go to Vercel Blob when a token is configured (required on Vercel: its disk is ephemeral).
 if env("BLOB_READ_WRITE_TOKEN"):
     STORAGES["default"] = {"BACKEND": "apps.core.storage.VercelBlobStorage"}

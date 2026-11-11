@@ -8,6 +8,6 @@
   </ol>
 </nav>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{% for label, url in breadcrumbs %}{"@type":"ListItem","position":{{ forloop.counter }},"name":"{{ label|escapejs }}"{% if url %},"item":"{{ request.scheme }}://{{ request.get_host }}{{ url|escapejs }}"{% endif %}}{% if not forloop.last %},{% endif %}{% endfor %}]}
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{% for label, url in breadcrumbs %}{"@type":"ListItem","position":{{ forloop.counter }},"name":"{{ label|escapejs }}"{% if url %},"item":"{{ canonical_base }}{{ url|escapejs }}"{% endif %}}{% if not forloop.last %},{% endif %}{% endfor %}]}
 </script>
 {% endif %}

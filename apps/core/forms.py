@@ -35,6 +35,15 @@ class BootstrapFormMixin:
                 attrs["aria-invalid"] = "true"
 
 
+class TelInput(forms.TextInput):
+    """Phone field: opens the numeric keypad on mobile and allows browser autofill."""
+
+    input_type = "tel"
+
+    def __init__(self, attrs=None):
+        super().__init__({"autocomplete": "tel", "inputmode": "tel", **(attrs or {})})
+
+
 class HoneypotMixin(forms.Form):
     """Hidden field that humans never fill in. Bots that do are rejected silently."""
 

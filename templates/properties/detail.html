@@ -2,7 +2,12 @@
 {% block title %}{{ property.seo_title|default:property.title }}{% if not property.seo_title %} in {{ property.location_label }}{% endif %} | {{ site.brand_name }}{% endblock %}
 {% block meta_description %}{% if property.seo_description %}{{ property.seo_description }}{% else %}{{ property.title }} for {{ property.get_purpose_display|lower }} in {{ property.location_label }}{% if property.price %} at {{ property.price|inr_short }}{% endif %}. {{ property.area|num }} {{ property.get_area_unit_display }}. Listing ID {{ property.listing_id }}.{% endif %}{% endblock %}
 {% block og_title %}{{ property.title }} – {{ property.location_label }}{% endblock %}
-{% block og_image %}{% with img=images.0 %}{% if img %}{{ request.scheme }}://{{ request.get_host }}{{ img.image.url }}{% else %}{{ block.super }}{% endif %}{% endwith %}{% endblock %}
+{% block og_image %}{% with img=images.0 %}{% if img %}{% absolute_url img.image.url %}{% else %}{{ block.super }}{% endif %}{% endwith %}{% endblock %}
+{% block structured_data %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"RealEstateListing","name":"{{ property.title|escapejs }}","url":"{% absolute_url property.get_absolute_url %}"{% if property.published_at %},"datePosted":"{{ property.published_at|date:'c' }}"{% endif %}{% if property.description %},"description":"{{ property.description|truncatechars:300|escapejs }}"{% endif %}{% if images %},"image":[{% for img in images|slice:":5" %}"{% absolute_url img.image.url %}"{% if not forloop.last %},{% endif %}{% endfor %}]{% endif %},"contentLocation":{"@type":"Place","address":{"@type":"PostalAddress",{% if property.locality %}"streetAddress":"{{ property.locality.name|escapejs }}",{% endif %}"addressLocality":"{{ property.city.name|escapejs }}","addressRegion":"{{ property.city.state.name|escapejs }}","addressCountry":"IN"}}{% if property.price %},"offers":{"@type":"Offer","price":"{{ property.price|floatformat:0 }}","priceCurrency":"INR"}{% endif %}}
+</script>
+{% endblock %}
 {% block body_class %}has-mobile-cta{% endblock %}
 
 {% block content %}
@@ -16,7 +21,7 @@
       {% for img in images|slice:":3" %}
       <button type="button" class="g-item {% if forloop.first %}g-main{% else %}g-side{% endif %}" data-gallery-index="{{ forloop.counter0 }}" aria-label="Open photo {{ forloop.counter }} of {{ n }}">
         {% if forloop.first %}<span class="g-badges">{% if property.rera_number %}<span class="hm-badge hm-badge-rera">RERA registered</span>{% endif %}{% if property.is_verified %}<span class="hm-badge hm-badge-verified">Verified</span>{% endif %}</span>{% endif %}
-        <img src="{{ img.image.url }}" alt="{{ img.alt }}" {% if img.width %}width="{{ img.width }}" height="{{ img.height }}"{% endif %} {% if not forloop.first %}loading="lazy"{% endif %} decoding="async">
+        <img src="{% img_src img.image 1200 %}" srcset="{% img_srcset img.image '400,800,1200,1600' %}" sizes="{% if forloop.first %}(max-width: 767px) 100vw, 800px{% else %}400px{% endif %}" alt="{{ img.alt }}" {% if img.width %}width="{{ img.width }}" height="{{ img.height }}"{% endif %} {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async">
         {% if forloop.counter == 3 and n > 3 %}<span class="g-more">+{{ n|add:"-3" }} photos</span>{% endif %}
       </button>
       {% endfor %}
@@ -155,7 +160,7 @@
           <div class="carousel-inner">
             {% for img in images %}
             <div class="carousel-item {% if forloop.first %}active{% endif %}">
-              <img src="{{ img.image.url }}" class="d-block w-100" style="max-height:78vh;object-fit:contain" alt="{{ img.alt }}" loading="lazy">
+              <img src="{% img_src img.image 1600 %}" class="d-block w-100" style="max-height:78vh;object-fit:contain" alt="{{ img.alt }}" loading="lazy">
               {% if img.caption %}<div class="carousel-caption"><p class="mb-0">{{ img.caption }}</p></div>{% endif %}
             </div>
             {% endfor %}

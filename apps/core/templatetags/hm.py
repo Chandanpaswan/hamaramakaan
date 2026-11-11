@@ -3,6 +3,7 @@ import re
 from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from pathlib import Path
+from urllib.parse import quote
 
 from django import template
 from django.conf import settings
@@ -188,8 +189,31 @@ def url_replace(context, **kwargs):
 
 @register.simple_tag(takes_context=True)
 def absolute_url(context, path=None):
-    request = context["request"]
-    return request.build_absolute_uri(path or request.path)
+    """Canonical absolute URL. Already-absolute URLs (e.g. Blob photos) are returned unchanged."""
+    path = path or context["request"].path
+    if str(path).startswith(("http://", "https://")):
+        return path
+    return f"{context.get('canonical_base', '')}{path}"
+
+
+def _optimized(url, width):
+    # Vercel Image Optimization: resized WebP/AVIF from the CDN. Widths must be listed in vercel.json "images.sizes".
+    if settings.IMAGE_OPTIMIZATION and url.startswith("https://"):
+        return f"/_vercel/image?url={quote(url, safe='')}&w={int(width)}&q=75"
+    return url
+
+
+@register.simple_tag
+def img_src(image, width=800):
+    return _optimized(image.url, width)
+
+
+@register.simple_tag
+def img_srcset(image, widths="400,800,1200"):
+    url = image.url
+    if not (settings.IMAGE_OPTIMIZATION and url.startswith("https://")):
+        return ""
+    return ", ".join(f"{_optimized(url, w)} {w}w" for w in str(widths).split(","))
 
 
 @register.filter

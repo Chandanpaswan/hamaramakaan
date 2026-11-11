@@ -13,7 +13,7 @@
   <div class="gallery single">
     <div class="g-item g-main">
       <span class="g-badges"><span class="hm-badge hm-badge-info">{{ project.get_status_display }}</span>{% if project.rera_number %}<span class="hm-badge hm-badge-rera">RERA registered</span>{% endif %}{% if project.is_sample %}<span class="hm-badge hm-badge-sample">Sample</span>{% endif %}</span>
-      {% if project.cover_image %}<img src="{{ project.cover_image.url }}" alt="{{ project.cover_image_alt|default:project.name }}">{% else %}{% include "includes/placeholder_art.html" with kind="tower" uid="proj" %}{% endif %}
+      {% if project.cover_image %}<img src="{% img_src project.cover_image 1200 %}" srcset="{% img_srcset project.cover_image '800,1200,1600' %}" sizes="100vw" alt="{{ project.cover_image_alt|default:project.name }}" fetchpriority="high">{% else %}{% include "includes/placeholder_art.html" with kind="tower" uid="proj" %}{% endif %}
     </div>
   </div>
   {% if project.is_artist_impression %}<p class="form-text">Image is an artist’s impression.</p>{% endif %}

@@ -29,6 +29,43 @@ class SitemapTests(TestCase):
         self.assertContains(self.client.get(empty.get_absolute_url()), 'content="noindex')
 
 
+class CanonicalAndImageTests(TestCase):
+    def setUp(self):
+        from django.contrib.sites.models import Site
+        from django.core.cache import cache
+
+        Site.objects.update_or_create(pk=1, defaults={"domain": "hamaramakaan.com", "name": "HM"})
+        cache.clear()
+
+    def test_canonical_uses_site_domain_not_request_host(self):
+        prop = make_property()
+        html = self.client.get(prop.get_absolute_url()).content.decode()
+        self.assertIn(f'rel="canonical" href="https://hamaramakaan.com{prop.get_absolute_url()}"', html)
+        self.assertIn('"@type":"RealEstateListing"', html)
+        self.assertIn('"priceCurrency":"INR"', html)
+
+    def test_absolute_image_urls_are_not_double_prefixed(self):
+        from django.template import Context, Template
+
+        out = Template("{% absolute_url url %}").render(Context({"url": "https://x.public.blob.vercel-storage.com/a.jpg",
+                                                                 "canonical_base": "https://hamaramakaan.com"}))
+        self.assertEqual(out, "https://x.public.blob.vercel-storage.com/a.jpg")
+
+    def test_image_optimization_urls(self):
+        from types import SimpleNamespace
+
+        from apps.core.templatetags.hm import img_src, img_srcset
+
+        blob = SimpleNamespace(url="https://x.public.blob.vercel-storage.com/p/a b.jpg")
+        with self.settings(IMAGE_OPTIMIZATION=True):
+            self.assertEqual(img_src(blob, 400),
+                             "/_vercel/image?url=https%3A%2F%2Fx.public.blob.vercel-storage.com%2Fp%2Fa%20b.jpg&w=400&q=75")
+            self.assertTrue(img_srcset(blob, "400,800").endswith(" 800w"))
+        with self.settings(IMAGE_OPTIMIZATION=False):
+            self.assertEqual(img_src(blob, 400), blob.url)
+            self.assertEqual(img_srcset(blob), "")
+
+
 class BlogTests(TestCase):
     def test_draft_and_future_posts_hidden(self):
         draft = BlogPost.objects.create(title="Draft", body="x")

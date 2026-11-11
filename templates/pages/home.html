@@ -2,8 +2,8 @@
 {% block structured_data %}
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
- {"@type":"Organization","name":"{{ site.brand_name|escapejs }}","url":"{{ request.scheme }}://{{ request.get_host }}/","logo":"{{ request.scheme }}://{{ request.get_host }}{% static 'images/brand/social-logo.png' %}"{% if site.phone %},"telephone":"{{ site.phone|escapejs }}"{% endif %}{% if site.email %},"email":"{{ site.email|escapejs }}"{% endif %}{% if site.social_links %},"sameAs":[{% for label, url in site.social_links %}"{{ url|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}]{% endif %}},
- {"@type":"WebSite","name":"{{ site.brand_name|escapejs }}","url":"{{ request.scheme }}://{{ request.get_host }}/","potentialAction":{"@type":"SearchAction","target":"{{ request.scheme }}://{{ request.get_host }}{% url 'properties:list' %}?q={search_term_string}","query-input":"required name=search_term_string"}}
+ {"@type":"{% if site.address %}RealEstateAgent{% else %}Organization{% endif %}","name":"{{ site.brand_name|escapejs }}","url":"{{ canonical_base }}/","logo":"{{ canonical_base }}{% static 'images/brand/social-logo.png' %}"{% if site.address %},"image":"{{ canonical_base }}{% static 'images/brand/social-logo.png' %}","address":{"@type":"PostalAddress","streetAddress":"{{ site.address|escapejs }}","addressCountry":"IN"},"areaServed":["Faridabad","Delhi NCR"]{% endif %}{% if site.phone %},"telephone":"{{ site.phone|escapejs }}"{% endif %}{% if site.email %},"email":"{{ site.email|escapejs }}"{% endif %}{% if site.social_links %},"sameAs":[{% for label, url in site.social_links %}"{{ url|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}]{% endif %}},
+ {"@type":"WebSite","name":"{{ site.brand_name|escapejs }}","url":"{{ canonical_base }}/","potentialAction":{"@type":"SearchAction","target":"{{ canonical_base }}{% url 'properties:list' %}?q={search_term_string}","query-input":"required name=search_term_string"}}
 ]}
 </script>
 {% endblock %}
@@ -34,11 +34,11 @@
 
 <div class="container">
   <form class="search-panel" method="get" action="{% url 'properties:buy' %}" data-home-search data-clean-get role="search" aria-label="Property search">
-    <div class="nav search-tabs" role="tablist">
-      <button type="button" class="nav-link active" role="tab" aria-selected="true" data-search-tab data-action="{% url 'properties:buy' %}" data-budget="sale">Buy</button>
-      <button type="button" class="nav-link" role="tab" aria-selected="false" data-search-tab data-action="{% url 'properties:rent' %}" data-budget="rent">Rent</button>
-      <button type="button" class="nav-link" role="tab" aria-selected="false" data-search-tab data-action="{% url 'properties:commercial' %}" data-budget="sale">Commercial</button>
-      <a class="nav-link" href="{% url 'properties:projects' %}">New Projects</a>
+    <div class="nav search-tabs" role="group" aria-label="What are you looking for?">
+      <button type="button" class="nav-link active" aria-pressed="true" data-search-tab data-action="{% url 'properties:buy' %}" data-budget="sale">Buy</button>
+      <button type="button" class="nav-link" aria-pressed="false" data-search-tab data-action="{% url 'properties:rent' %}" data-budget="rent">Rent</button>
+      <button type="button" class="nav-link" aria-pressed="false" data-search-tab data-action="{% url 'properties:commercial' %}" data-budget="sale">Commercial</button>
+      <a class="nav-link d-none d-sm-block" href="{% url 'properties:projects' %}">New Projects</a>
     </div>
     <div class="row g-2 g-md-3">
       <div class="col-md-3">
@@ -86,7 +86,7 @@
       <div><h2 id="featured-title">Handpicked for you</h2><p>Featured listings reviewed by our team</p></div>
       <a class="btn btn-ghost" href="{% url 'properties:list' %}?sort=featured">View all</a>
     </div>
-    <div class="row g-3 g-lg-4">{% for p in featured %}<div class="col-sm-6 col-lg-3">{% include "includes/property_card.html" %}</div>{% endfor %}</div>
+    <div class="row g-3 g-lg-4">{% for p in featured %}<div class="col-sm-6 col-lg-3">{% include "includes/property_card.html" with eager=forloop.first %}</div>{% endfor %}</div>
   </div>
 </section>
 {% endif %}

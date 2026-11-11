@@ -24,7 +24,7 @@
       <tbody>
       {% for p in page_obj %}
         <tr>
-          <td>{% with img=p.primary_image %}{% if img %}<img class="thumb" src="{{ img.image.url }}" alt="">{% else %}<span class="thumb">{% include "includes/placeholder_art.html" with kind=p.property_type.illustration uid=p.pk %}</span>{% endif %}{% endwith %}</td>
+          <td>{% with img=p.primary_image %}{% if img %}<img class="thumb" src="{% img_src img.image 400 %}" alt="" loading="lazy">{% else %}<span class="thumb">{% include "includes/placeholder_art.html" with kind=p.property_type.illustration uid=p.pk %}</span>{% endif %}{% endwith %}</td>
           <td class="text-nowrap">{{ p.listing_id }}</td>
           <td><a class="fw-semibold" href="{% url 'dashboard:property_detail' p.pk %}">{{ p.title|truncatechars:50 }}</a>
             <div class="small text-meta">{{ p.property_type }}{% if p.source == "owner" %} · <span class="hm-badge hm-badge-new">Owner</span>{% endif %}{% if p.is_featured %} · <span class="hm-badge hm-badge-featured">Featured</span>{% endif %}{% if p.is_sample %} · <span class="hm-badge hm-badge-sample">Sample</span>{% endif %}</div></td>

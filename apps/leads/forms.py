@@ -1,6 +1,6 @@
 from django import forms
 
-from apps.core.forms import BootstrapFormMixin, HoneypotMixin
+from apps.core.forms import BootstrapFormMixin, HoneypotMixin, TelInput
 from apps.core.models import phone_validator
 
 from .models import Lead
@@ -16,7 +16,7 @@ class BaseLeadForm(BootstrapFormMixin, HoneypotMixin, forms.ModelForm):
         fields = ["name", "phone", "email"]
         widgets = {
             "name": forms.TextInput(attrs={"autocomplete": "name"}),
-            "phone": forms.TextInput(attrs={"autocomplete": "tel", "inputmode": "tel"}),
+            "phone": TelInput(),
             "email": forms.EmailInput(attrs={"autocomplete": "email"}),
         }
         labels = {"name": "Your name", "phone": "Mobile number", "email": "Email (optional)"}

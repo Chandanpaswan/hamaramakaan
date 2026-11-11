@@ -27,7 +27,8 @@
   </section>
   {% endif %}
   {% if properties %}
-    <div class="row g-3 g-lg-4">{% for p in properties %}<div class="col-sm-6 col-lg-4 col-xl-3">{% include "includes/property_card.html" %}</div>{% endfor %}</div>
+    <h2 class="h5 mb-3">Listings in {{ place.name }}</h2>
+    <div class="row g-3 g-lg-4">{% for p in properties %}<div class="col-sm-6 col-lg-4 col-xl-3">{% include "includes/property_card.html" with eager=forloop.first %}</div>{% endfor %}</div>
     {% include "includes/pagination.html" %}
   {% else %}
     <div class="empty-state"><span class="empty-icon">{% icon "map-pin" 28 %}</span><h2 class="h5">No listings in {{ place.name }} right now</h2><p class="text-meta">Share your requirement and we’ll let you know when something suitable is available.</p><a class="btn btn-primary" href="{% url 'pages:contact' %}">Contact us</a></div>

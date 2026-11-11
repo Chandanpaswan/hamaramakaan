@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ meta.title }}{% if page_obj.number > 1 %} – page {{ page_obj.number }}{% endif %} | {{ site.brand_name }}{% endblock %}
 {% block meta_description %}{{ meta.title }}. {{ meta.intro }} Browse listings reviewed by {{ site.brand_name }}.{% endblock %}
-{% block canonical %}{{ request.scheme }}://{{ request.get_host }}{{ canonical_path }}{% endblock %}
+{% block canonical %}{% absolute_url canonical_path %}{% endblock %}
 
 {% block content %}
 <div class="page-hero">
@@ -96,7 +96,8 @@
       {% if form.errors %}<div class="alert alert-warning">Some filters were not valid and have been ignored.</div>{% endif %}
 
       {% if properties %}
-        <div class="row g-3 g-lg-4">{% for p in properties %}<div class="col-sm-6 col-xl-4">{% include "includes/property_card.html" %}</div>{% endfor %}</div>
+        <h2 class="visually-hidden">Search results</h2>
+        <div class="row g-3 g-lg-4">{% for p in properties %}<div class="col-sm-6 col-xl-4">{% include "includes/property_card.html" with eager=forloop.first %}</div>{% endfor %}</div>
         {% include "includes/pagination.html" %}
       {% else %}
         <div class="empty-state">

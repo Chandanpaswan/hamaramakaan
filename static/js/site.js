@@ -11,10 +11,10 @@
       tab.addEventListener("click", function () {
         search.querySelectorAll("[data-search-tab]").forEach(function (t) {
           t.classList.remove("active");
-          t.setAttribute("aria-selected", "false");
+          t.setAttribute("aria-pressed", "false");
         });
         tab.classList.add("active");
-        tab.setAttribute("aria-selected", "true");
+        tab.setAttribute("aria-pressed", "true");
         search.action = tab.dataset.action;
         var list = budgets[tab.dataset.budget] || budgets.sale;
         budget.innerHTML = "";

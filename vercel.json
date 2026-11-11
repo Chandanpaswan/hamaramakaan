@@ -4,6 +4,12 @@
   "regions": ["sin1"],
   "outputDirectory": "public",
   "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }],
+  "images": {
+    "sizes": [400, 800, 1200, 1600],
+    "formats": ["image/avif", "image/webp"],
+    "minimumCacheTTL": 86400,
+    "remotePatterns": [{ "protocol": "https", "hostname": "*.public.blob.vercel-storage.com" }]
+  },
   "functions": {
     "api/index.py": {
       "maxDuration": 30,

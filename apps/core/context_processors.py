@@ -20,10 +20,27 @@ def _footer_data():
     return data
 
 
+def canonical_base(request):
+    """One canonical origin for canonical tags, og:url and JSON-LD, so extra hostnames
+    (e.g. several *.vercel.app aliases) never compete as duplicate content."""
+    if settings.DEBUG:
+        return f"{request.scheme}://{request.get_host()}"
+    domain = cache.get("hm:canonical-domain")
+    if domain is None:
+        from django.contrib.sites.models import Site
+
+        domain = Site.objects.get_current().domain
+        cache.set("hm:canonical-domain", domain, 3600)
+    if domain in ("", "example.com"):
+        return f"{request.scheme}://{request.get_host()}"
+    return f"https://{domain}"
+
+
 def site(request):
     path = request.path
     is_dashboard = path.startswith(f"/{settings.DASHBOARD_PATH}")
     context = {
+        "canonical_base": canonical_base(request),
         "site": SiteSetting.load(),
         "DASHBOARD_PATH": settings.DASHBOARD_PATH,
         "DEBUG": settings.DEBUG,

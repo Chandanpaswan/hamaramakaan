@@ -24,7 +24,7 @@
   {% if featured %}
   <article class="hm-card overflow-hidden mb-4 position-relative">
     <div class="row g-0">
-      <div class="col-md-6"><div class="post-card border-0 rounded-0 h-100"><div class="post-media h-100" style="aspect-ratio:auto;min-height:240px">{% if featured.featured_image %}<img src="{{ featured.featured_image.url }}" alt="{{ featured.featured_image_alt|default:featured.title }}">{% endif %}</div></div></div>
+      <div class="col-md-6"><div class="post-card border-0 rounded-0 h-100"><div class="post-media h-100" style="aspect-ratio:auto;min-height:240px">{% if featured.featured_image %}<img src="{% img_src featured.featured_image 800 %}" srcset="{% img_srcset featured.featured_image '400,800,1200' %}" sizes="(max-width: 767px) 100vw, 50vw" alt="{{ featured.featured_image_alt|default:featured.title }}">{% endif %}</div></div></div>
       <div class="col-md-6 p-4 p-lg-5 d-flex flex-column justify-content-center">
         <span class="hm-badge hm-badge-featured align-self-start mb-2">Featured</span>
         <h2><a class="stretched-link text-decoration-none text-ink" href="{{ featured.get_absolute_url }}">{{ featured.title }}</a></h2>

@@ -131,7 +131,7 @@ a { text-underline-offset: 2px; }
 .search-panel .form-control, .search-panel .form-select { height: 52px; }
 .search-panel .btn-search { height: 52px; width: 100%; }
 .popular-chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; font-size: .82rem; color: var(--hm-slate-500); }
-.chip { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 14px; border-radius: 999px; background: #fff; border: 1px solid var(--hm-slate-300); font-weight: 500; font-size: .84rem; color: var(--hm-slate-700); text-decoration: none; }
+.chip { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: 999px; background: #fff; border: 1px solid var(--hm-slate-300); font-weight: 500; font-size: .84rem; color: var(--hm-slate-700); text-decoration: none; }
 .chip:hover { border-color: var(--hm-blue); color: var(--hm-blue); }
 .chip.on { background: var(--hm-mist); border-color: var(--hm-blue); color: var(--hm-deep); font-weight: 600; }
 
@@ -313,6 +313,18 @@ textarea.form-control { min-height: auto; }
 /* Maintenance / error */
 .error-page { min-height: 60vh; display: grid; place-items: center; text-align: center; padding: 48px 16px; }
 .error-page .code { font: 700 5rem/1 var(--font-head); color: var(--hm-mist); -webkit-text-stroke: 2px var(--hm-blue); }
+
+/* Mobile refinements */
+@media (max-width: 991.98px) {
+  .form-control, .form-select { font-size: 16px; } /* below 16px iOS Safari zooms into the field */
+  .results-bar { position: sticky; top: 61px; z-index: 6; background: var(--hm-paper); padding: 8px 0; }
+}
+@media (max-width: 575.98px) {
+  .hero { padding: 40px 0 104px; }
+  .search-panel { padding: 4px 16px 16px; border-radius: 16px; }
+  .search-tabs .nav-link { padding: 12px 10px 10px; }
+  .section-head { margin-bottom: 16px; }
+}
 
 /* Placeholder art scaling */
 .ph-art { width: 100%; height: 100%; display: block; }

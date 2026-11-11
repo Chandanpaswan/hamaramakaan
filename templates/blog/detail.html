@@ -4,10 +4,10 @@
 {% block canonical %}{% if post.canonical_url %}{{ post.canonical_url }}{% else %}{% absolute_url %}{% endif %}{% endblock %}
 {% block og_type %}article{% endblock %}
 {% block og_title %}{{ post.title }}{% endblock %}
-{% block og_image %}{% if post.featured_image %}{{ request.scheme }}://{{ request.get_host }}{{ post.featured_image.url }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block og_image %}{% if post.featured_image %}{% absolute_url post.featured_image.url %}{% else %}{{ block.super }}{% endif %}{% endblock %}
 {% block structured_data %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"{{ post.title|escapejs }}","description":"{{ post.excerpt|escapejs }}","datePublished":"{{ post.published_at|date:'c' }}","dateModified":"{{ post.updated_at|date:'c' }}","author":{"@type":"Person","name":"{{ post.author_name|escapejs }}"},"publisher":{"@type":"Organization","name":"{{ site.brand_name|escapejs }}","logo":{"@type":"ImageObject","url":"{{ request.scheme }}://{{ request.get_host }}{% static 'images/brand/social-logo.png' %}"}},"mainEntityOfPage":"{% absolute_url %}"{% if post.featured_image %},"image":"{{ request.scheme }}://{{ request.get_host }}{{ post.featured_image.url }}"{% endif %}}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"{{ post.title|escapejs }}","description":"{{ post.excerpt|escapejs }}","datePublished":"{{ post.published_at|date:'c' }}","dateModified":"{{ post.updated_at|date:'c' }}","author":{"@type":"Person","name":"{{ post.author_name|escapejs }}"},"publisher":{"@type":"Organization","name":"{{ site.brand_name|escapejs }}","logo":{"@type":"ImageObject","url":"{{ canonical_base }}{% static 'images/brand/social-logo.png' %}"}},"mainEntityOfPage":"{% absolute_url %}"{% if post.featured_image %},"image":"{% absolute_url post.featured_image.url %}"{% endif %}}
 </script>
 {% endblock %}
 {% block content %}
@@ -22,7 +22,7 @@
     </ol></nav>
     <h1>{{ post.title }}</h1>
     <p class="post-meta mb-4">By {{ post.author_name }} · <time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"j F Y" }}</time> · {{ post.reading_minutes }} min read</p>
-    {% if post.featured_image %}<img class="w-100 rounded-4 mb-4" src="{{ post.featured_image.url }}" alt="{{ post.featured_image_alt|default:post.title }}">{% endif %}
+    {% if post.featured_image %}<img class="w-100 h-auto rounded-4 mb-4" src="{% img_src post.featured_image 1200 %}" srcset="{% img_srcset post.featured_image '800,1200,1600' %}" sizes="(max-width: 800px) 100vw, 760px" alt="{{ post.featured_image_alt|default:post.title }}" fetchpriority="high">{% endif %}
     {% if post.excerpt %}<p class="lead text-ink">{{ post.excerpt }}</p>{% endif %}
     <div class="rich-text">{{ post.body|rich_text }}</div>
     {% if post.tags.all %}<div class="d-flex flex-wrap gap-2 mt-4">{% for t in post.tags.all %}<span class="hm-badge hm-badge-muted">#{{ t.name }}</span>{% endfor %}</div>{% endif %}

@@ -65,7 +65,7 @@
           {% for img in images %}
           <div class="col-sm-6 col-lg-4">
             <div class="img-tile">
-              <img src="{{ img.image.url }}" alt="{{ img.alt }}" loading="lazy">
+              <img src="{% img_src img.image 400 %}" alt="{{ img.alt }}" loading="lazy">
               <div class="p-2">
                 {% if img.is_primary %}<span class="hm-badge hm-badge-verified mb-2">Main photo</span>{% endif %}
                 {% if perms.properties.change_property %}

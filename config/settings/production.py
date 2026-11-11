@@ -12,8 +12,12 @@ if ON_VERCEL:
     ALLOWED_HOSTS = [*ALLOWED_HOSTS, *vercel_hosts]
     CSRF_TRUSTED_ORIGINS = [*CSRF_TRUSTED_ORIGINS, *[f"https://{h}" for h in vercel_hosts]]
     # No collectstatic step on Vercel: WhiteNoise serves files straight from the app's static folders.
+    # Static URLs carry ?v=<commit> so browsers can cache them for a year and still get each new deploy.
     WHITENOISE_USE_FINDERS = True
-    STORAGES["staticfiles"] = {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}
+    STORAGES["staticfiles"] = {"BACKEND": "apps.core.storage.VersionedStaticFilesStorage"}
+    if env("VERCEL_GIT_COMMIT_SHA"):
+        WHITENOISE_MAX_AGE = 31536000
+    IMAGE_OPTIMIZATION = env_bool("IMAGE_OPTIMIZATION", True)
 
 if not SECRET_KEY:
     raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set in production.")

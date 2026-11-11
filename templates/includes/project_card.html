@@ -6,7 +6,7 @@
       {% if project.rera_number %}<span class="hm-badge hm-badge-rera">RERA</span>{% endif %}
     </div>
     {% if project.cover_image %}
-      <img src="{{ project.cover_image.url }}" alt="{{ project.cover_image_alt|default:project.name }}" loading="lazy" decoding="async">
+      <img src="{% img_src project.cover_image 800 %}" srcset="{% img_srcset project.cover_image '400,800' %}" sizes="(max-width: 767px) 100vw, 400px" alt="{{ project.cover_image_alt|default:project.name }}" loading="lazy" decoding="async">
       {% if project.is_artist_impression %}<span class="pc-count">Artist’s impression</span>{% endif %}
     {% else %}
       {% include "includes/placeholder_art.html" with kind="tower" uid=project.pk|stringformat:"dp" %}

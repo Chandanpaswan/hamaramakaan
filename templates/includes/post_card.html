@@ -1,7 +1,7 @@
 {% load static %}
 <article class="post-card">
   <div class="post-media">
-    {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.featured_image_alt|default:post.title }}" loading="lazy" decoding="async">
+    {% if post.featured_image %}<img src="{% img_src post.featured_image 800 %}" srcset="{% img_srcset post.featured_image '400,800' %}" sizes="(max-width: 767px) 100vw, 400px" alt="{{ post.featured_image_alt|default:post.title }}" loading="lazy" decoding="async">
     {% else %}<img src="{% static 'images/brand/brand-icon.svg' %}" alt="" style="width:72px;height:72px;opacity:.5;object-fit:contain" loading="lazy">{% endif %}
   </div>
   <div class="post-body">
