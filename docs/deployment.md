@@ -1,4 +1,37 @@
-# Deployment guide (Ubuntu 24.04 · Nginx · Gunicorn · PostgreSQL)
+# Deployment guide
+
+## Option A: Vercel (current live deployment)
+
+Live at **https://hamaramakaan.vercel.app**. The Vercel project `hamaramakaan` is connected to GitHub, and **every push to `main` deploys to production automatically**. Other branches get preview URLs.
+
+| Piece | How it's set up |
+|---|---|
+| App | `api/index.py` (Django WSGI) with `vercel.json` sending every route to it. Function region `sin1` (Singapore). |
+| Static files | Served by WhiteNoise from `static/` (no collectstatic step). Only `public/` is served as raw files. |
+| Database | Neon Postgres (free plan, Singapore), via the `DATABASE_URL` env var |
+| Photos | Vercel Blob (public store `hamaramakaan-media`), via `BLOB_READ_WRITE_TOKEN`, handled by `apps/core/storage.py` |
+| Settings | `DJANGO_SETTINGS_MODULE=config.settings.production`, `DJANGO_SECRET_KEY`, `USE_X_FORWARDED_FOR=true` |
+
+**Limits to know**
+- A request body can be at most **4.5 MB**. Browsers resize photos to 1600px before upload, so this is normally fine.
+- Functions time out after 30 seconds.
+
+**Running management commands against production** (migrations, createsuperuser…):
+
+```bash
+vercel env pull .env.local          # downloads the DATABASE_URL and BLOB tokens (gitignored; never commit)
+# then run manage.py with those variables exported, e.g. in Git Bash:
+set -a; . ./.env.local; set +a
+DJANGO_SETTINGS_MODULE=config.settings.production DJANGO_SECRET_KEY=local-maintenance DJANGO_ALLOWED_HOSTS=localhost \
+  python manage.py migrate
+```
+
+- **After pulling a change that adds migrations:** run `migrate` as above, *before or right after* the deploy.
+- **Custom domain:** in Vercel → Project → Settings → Domains, add `hamaramakaan.com`, then run `python manage.py seed_content --domain hamaramakaan.com` (same environment as above) so the sitemap uses the new domain.
+
+---
+
+## Option B: Your own server (Ubuntu 24.04 · Nginx · Gunicorn · PostgreSQL)
 
 > Never use `runserver` in production. Production settings refuse to start without `DJANGO_SECRET_KEY` and `DJANGO_ALLOWED_HOSTS`.
 
