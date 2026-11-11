@@ -104,3 +104,28 @@ class PropertyDeleteTests(TestCase):
         self.assertTrue(Property.objects.filter(pk=prop.pk).exists())  # GET alone deletes nothing
         self.assertRedirects(self.client.post(f"/manage/properties/{prop.pk}/delete/"), "/manage/properties/")
         self.assertFalse(Property.objects.filter(pk=prop.pk).exists())
+
+
+class SeedPhotoRepairTests(TestCase):
+    """seed_demo re-attaches sample photos whose files are missing from storage."""
+
+    def test_missing_files_are_reattached(self):
+        import io
+        from unittest import mock
+
+        from django.core.files.base import ContentFile
+        from PIL import Image
+
+        from apps.core.management.commands.seed_demo import Command
+        from apps.properties.models import PropertyImage
+
+        buf = io.BytesIO()
+        Image.new("RGB", (4, 4)).save(buf, "JPEG")
+        prop = make_property(title="3 BHK apartment with park view", is_sample=True)
+        gone = PropertyImage.objects.create(property=prop, image=ContentFile(buf.getvalue(), name="gone.jpg"), is_primary=True)
+        gone.image.storage.delete(gone.image.name)  # the row stays, the file is gone
+        with mock.patch.object(Command, "_photo", side_effect=lambda key: ContentFile(buf.getvalue(), name=f"{key}.jpg")):
+            Command().attach_photos()
+        images = list(prop.images.all())
+        self.assertEqual(len(images), 4)
+        self.assertTrue(all(i.image.storage.exists(i.image.name) for i in images))

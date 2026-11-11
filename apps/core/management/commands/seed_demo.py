@@ -114,6 +114,10 @@ POST_BODY = (
 )
 
 
+def _stored(f):
+    return bool(f) and f.storage.exists(f.name)
+
+
 class Command(BaseCommand):
     help = "Load clearly-labelled SAMPLE listings, projects, posts, leads and demo staff (development only)."
 
@@ -172,8 +176,10 @@ class Command(BaseCommand):
     def attach_photos(self):
         added, failed = 0, []
         for prop in Property.objects.filter(is_sample=True, title__in=LISTING_PHOTOS).prefetch_related("images"):
-            if prop.images.exists():
+            images = list(prop.images.all())
+            if images and all(_stored(i.image) for i in images):
                 continue
+            prop.images.all().delete()  # rows whose files are gone (e.g. a database copied without its media)
             for order, key in enumerate(LISTING_PHOTOS[prop.title]):
                 try:
                     PropertyImage.objects.create(
@@ -189,7 +195,7 @@ class Command(BaseCommand):
             (BlogPost, POST_PHOTOS, "featured_image", "featured_image_alt", "title"),
         ]:
             for obj in model.objects.filter(is_sample=True, **{f"{name_field}__in": mapping}):
-                if getattr(obj, field):
+                if _stored(getattr(obj, field)):
                     continue
                 try:
                     getattr(obj, field).save(f"{mapping[getattr(obj, name_field)]}.jpg",
