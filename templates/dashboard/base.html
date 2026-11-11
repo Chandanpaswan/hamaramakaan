@@ -16,7 +16,7 @@
 {% with url_name=request.resolver_match.url_name slug=request.resolver_match.kwargs.slug %}
 <div class="dash-shell">
   <nav class="dash-sidebar" id="dashSidebar" aria-label="Dashboard navigation">
-    <a class="brand" href="{% url 'dashboard:home' %}"><img src="{% static 'images/brand/logo-horizontal-white.svg' %}" alt="{{ site.brand_name }} dashboard" width="137" height="34"></a>
+    <a class="brand" href="{% url 'dashboard:home' %}"><img src="{% static 'images/brand/logo-horizontal.svg' %}" alt="{{ site.brand_name }} dashboard" width="137" height="34"></a>
     <a href="{% url 'dashboard:home' %}" class="{% if url_name == 'home' %}active{% endif %}">{% icon "compass" 18 %} Overview</a>
     {% if perms.properties.view_property %}<a href="{% url 'dashboard:property_list' %}" class="{% if 'property' in url_name %}active{% endif %}">{% icon "apartment" 18 %} Properties{% if nav_pending %}<span class="count" title="Pending review">{{ nav_pending }}</span>{% endif %}</a>{% endif %}
     {% if perms.leads.view_lead %}<a href="{% url 'dashboard:lead_list' %}" class="{% if 'lead' in url_name %}active{% endif %}">{% icon "user" 18 %} Leads{% if nav_new_leads %}<span class="count" title="New leads">{{ nav_new_leads }}</span>{% endif %}</a>{% endif %}
