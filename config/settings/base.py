@@ -1,6 +1,7 @@
 """Shared settings for every environment. Secrets come from environment variables / .env."""
 import os
 from pathlib import Path
+from urllib.parse import parse_qs, unquote, urlparse
 
 from dotenv import load_dotenv
 
@@ -87,8 +88,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Database: SQLite locally, PostgreSQL in staging/production (set DB_ENGINE=postgres).
-if env("DB_ENGINE", "sqlite") == "postgres":
+# Database: SQLite locally, PostgreSQL in staging/production.
+# DATABASE_URL (e.g. from Neon / Vercel) takes priority; otherwise DB_ENGINE=postgres + DB_* vars.
+if env("DATABASE_URL"):
+    _db = urlparse(env("DATABASE_URL"))
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": _db.path.lstrip("/"),
+            "USER": unquote(_db.username or ""),
+            "PASSWORD": unquote(_db.password or ""),
+            "HOST": _db.hostname,
+            "PORT": _db.port or 5432,
+            "OPTIONS": {key: values[0] for key, values in parse_qs(_db.query).items()},
+            "CONN_MAX_AGE": int(env("DB_CONN_MAX_AGE", "0")),
+        }
+    }
+elif env("DB_ENGINE", "sqlite") == "postgres":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -134,6 +150,9 @@ STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
+# Uploaded photos go to Vercel Blob when a token is configured (required on Vercel: its disk is ephemeral).
+if env("BLOB_READ_WRITE_TOKEN"):
+    STORAGES["default"] = {"BACKEND": "apps.core.storage.VercelBlobStorage"}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

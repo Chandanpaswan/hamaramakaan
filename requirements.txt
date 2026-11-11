@@ -1,1 +1,2 @@
--r requirements/development.txt
+# Installed by Vercel and production servers. Local dev: pip install -r requirements/development.txt
+-r requirements/production.txt

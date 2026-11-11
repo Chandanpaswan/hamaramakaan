@@ -1,9 +1,20 @@
 from django.core.exceptions import ImproperlyConfigured
 
 from .base import *  # noqa: F401,F403
-from .base import ALLOWED_HOSTS, SECRET_KEY, env, env_bool
+from .base import ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, SECRET_KEY, STORAGES, env, env_bool
 
 DEBUG = False
+
+# --- Vercel (serverless) ---------------------------------------------------------------
+ON_VERCEL = bool(env("VERCEL"))
+if ON_VERCEL:
+    vercel_hosts = [env(k) for k in ("VERCEL_PROJECT_PRODUCTION_URL", "VERCEL_URL", "VERCEL_BRANCH_URL") if env(k)]
+    ALLOWED_HOSTS = [*ALLOWED_HOSTS, *vercel_hosts]
+    CSRF_TRUSTED_ORIGINS = [*CSRF_TRUSTED_ORIGINS, *[f"https://{h}" for h in vercel_hosts]]
+    # No collectstatic step on Vercel: WhiteNoise serves files straight from the app's static folders.
+    WHITENOISE_USE_FINDERS = True
+    STORAGES["staticfiles"] = {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}
+
 if not SECRET_KEY:
     raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set in production.")
 if not ALLOWED_HOSTS:
@@ -17,7 +28,7 @@ SECURE_HSTS_SECONDS = int(env("SECURE_HSTS_SECONDS", "31536000"))
 SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", True)
 SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", False)
 
-# A shared cache is required so rate limits and login lockouts work across Gunicorn workers.
+# A shared cache is required so rate limits and login lockouts work across workers / serverless instances.
 if env("REDIS_URL"):
     CACHES = {"default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": env("REDIS_URL")}}
 else:
