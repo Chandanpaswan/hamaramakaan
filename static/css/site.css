@@ -61,9 +61,9 @@ a { text-underline-offset: 2px; }
 .bg-mist { background: var(--hm-mist) !important; }
 .bg-paper { background: var(--hm-paper) !important; }
 .container { max-width: 1272px; }
-.section { padding: 64px 0; }
-.section-sm { padding: 40px 0; }
-@media (max-width: 767.98px) { .section { padding: 44px 0; } .container { padding-left: 16px; padding-right: 16px; } }
+.section { padding-block: 64px; } /* vertical only: these classes share elements with .container, whose side padding the grid needs */
+.section-sm { padding-block: 40px; }
+@media (max-width: 767.98px) { .section { padding-block: 44px; } .container { padding-left: 16px; padding-right: 16px; } }
 .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
 .section-head p { margin: 4px 0 0; color: var(--hm-slate-500); }
 .ic { flex: none; vertical-align: middle; }
