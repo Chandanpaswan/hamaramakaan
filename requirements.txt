@@ -1,2 +1,8 @@
-# Installed by Vercel and production servers. Local dev: pip install -r requirements/development.txt
--r requirements/production.txt
+# Production dependencies (installed by Vercel). Keep in sync with requirements/production.txt.
+# Local development: pip install -r requirements/development.txt
+Django>=5.2,<6.0
+Pillow>=11.0
+python-dotenv>=1.0
+whitenoise>=6.7
+psycopg[binary]>=3.2
+gunicorn>=23.0
