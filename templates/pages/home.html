@@ -191,7 +191,7 @@
 {% if posts %}
 <section class="section" aria-labelledby="blog-title">
   <div class="container">
-    <div class="section-head"><div><h2 id="blog-title">From our blog</h2><p>Guides for buyers, sellers and tenants</p></div><a class="btn btn-ghost" href="{% url 'blog:list' %}">Read more</a></div>
+    <div class="section-head"><div><h2 id="blog-title">From our blog</h2><p>Guides for buyers, sellers and tenants</p></div><a class="btn btn-ghost" href="{% url 'blog:list' %}">Read all articles</a></div>
     <div class="row g-3 g-lg-4">{% for post in posts %}<div class="col-md-4">{% include "includes/post_card.html" %}</div>{% endfor %}</div>
   </div>
 </section>

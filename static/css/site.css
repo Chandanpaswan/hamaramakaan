@@ -286,6 +286,7 @@ textarea.form-control { min-height: auto; }
 .site-footer .footer-logo { height: 46px; width: auto; }
 .site-footer .footer-bottom { border-top: 1px solid rgba(255, 255, 255, .12); margin-top: 40px; padding-top: 20px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: .8rem; color: rgba(255, 255, 255, .6); }
 .site-footer .tagline { font-family: var(--font-hindi); color: var(--hm-saffron); }
+.site-footer .footer-bottom a { text-decoration: underline; } /* link inside a sentence must not rely on colour alone */
 
 /* Mobile bottom nav */
 .bottom-nav { display: none; }
