@@ -102,6 +102,9 @@ if env("DATABASE_URL"):
             "PORT": _db.port or 5432,
             "OPTIONS": {key: values[0] for key, values in parse_qs(_db.query).items()},
             "CONN_MAX_AGE": int(env("DB_CONN_MAX_AGE", "0")),
+            # Neon's pooled URL uses PgBouncer transaction pooling, which breaks server-side cursors
+            # (used by .iterator() and form dropdowns): "cursor ... does not exist" 500s.
+            "DISABLE_SERVER_SIDE_CURSORS": True,
         }
     }
 elif env("DB_ENGINE", "sqlite") == "postgres":

@@ -31,7 +31,7 @@
           <td>{{ p.get_purpose_display }}</td>
           <td class="text-nowrap">{% if p.price %}{{ p.price|inr_short }}{% else %}—{% endif %}</td>
           <td>{{ p.location_label }}</td>
-          <td><span class="hm-badge {% if p.status == 'published' %}hm-badge-verified{% elif p.status == 'pending' %}hm-badge-featured{% elif p.status == 'rejected' %}hm-badge-error{% else %}hm-badge-muted{% endif %}">{{ p.get_status_display }}</span></td>
+          <td><span class="hm-badge {% if p.status == 'published' %}hm-badge-verified{% elif p.status == 'under_offer' %}hm-badge-featured{% elif p.status == 'pending' %}hm-badge-featured{% elif p.status == 'rejected' %}hm-badge-error{% else %}hm-badge-muted{% endif %}">{{ p.get_status_display }}</span></td>
           <td class="text-nowrap small">{{ p.updated_at|date:"j M Y" }}</td>
         </tr>
       {% empty %}

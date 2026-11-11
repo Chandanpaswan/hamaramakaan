@@ -41,6 +41,7 @@
           <div class="d-flex gap-2 mb-2 flex-wrap">
             {% if property.is_rental %}<span class="hm-badge hm-badge-rent">For {{ property.get_purpose_display|lower }}</span>{% else %}<span class="hm-badge hm-badge-sale">For sale</span>{% endif %}
             <span class="hm-badge hm-badge-muted">{{ property.property_type.name }}</span>
+            {% if property.status == "under_offer" %}<span class="hm-badge hm-badge-new">Under offer</span>{% endif %}
             {% if property.is_sample %}<span class="hm-badge hm-badge-sample">Sample</span>{% endif %}
           </div>
           <h1 class="mb-1">{{ property.title }}</h1>

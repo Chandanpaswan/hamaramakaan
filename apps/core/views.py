@@ -31,7 +31,7 @@ def home(request):
     latest = list(public.exclude(pk__in=[p.pk for p in featured]).order_by("-published_at")[:8])
     cities = (
         City.objects.filter(is_active=True)
-        .annotate(listing_count=Count("properties", filter=Q(properties__status=Property.Status.PUBLISHED)))
+        .annotate(listing_count=Count("properties", filter=Q(properties__status__in=Property.PUBLIC_STATUSES)))
         .order_by("sort_order", "name")[:12]
     )
     tiles = [

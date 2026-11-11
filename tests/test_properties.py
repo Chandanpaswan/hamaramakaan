@@ -120,8 +120,8 @@ class DetailAndEnquiryTests(TestCase):
 
     def test_rate_limit(self):
         with self.settings(FORM_RATE_LIMIT=2):
-            for _ in range(4):
-                self.post_enquiry()
+            for n in range(4):  # distinct phones, so duplicate-merging doesn't mask the rate limit
+                self.post_enquiry(phone=f"+91 98100 0000{n}")
         self.assertEqual(Lead.objects.count(), 2)
 
 

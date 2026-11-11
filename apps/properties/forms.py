@@ -255,7 +255,26 @@ class PostPropertyForm(BootstrapFormMixin, HoneypotMixin, forms.ModelForm):
         ptype = data.get("property_type")
         if ptype:
             data["category"] = ptype.category
+        self._reject_duplicate(data)
         return data
+
+    def _reject_duplicate(self, data):
+        """Same owner phone + city + type + price within 90 days counts as a repeat submission."""
+        from apps.core.utils import phone_key
+
+        phone, ptype, city = data.get("owner_phone"), data.get("property_type"), data.get("city")
+        if not (phone and ptype and city):
+            return
+        recent = Property.objects.filter(
+            source=Property.Source.OWNER, property_type=ptype, city=city, price=data.get("price"),
+            created_at__gte=timezone.now() - timedelta(days=90),
+        ).exclude(status__in=[Property.Status.REJECTED, Property.Status.ARCHIVED])
+        for prop in recent.only("listing_id", "owner_phone"):
+            if phone_key(prop.owner_phone) == phone_key(phone):
+                raise forms.ValidationError(
+                    f"You have already submitted this property (reference {prop.listing_id}). "
+                    "Our team will contact you, so there is no need to submit it again."
+                )
 
     def save(self, commit=True):
         prop = super().save(commit=False)

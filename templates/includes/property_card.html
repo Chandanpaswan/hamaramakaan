@@ -4,7 +4,7 @@
     <div class="pc-badges">
       {% if p.is_sample %}<span class="hm-badge hm-badge-sample">Sample</span>{% endif %}
       {% if p.is_rental %}<span class="hm-badge hm-badge-rent">For {{ p.get_purpose_display|lower }}</span>{% else %}<span class="hm-badge hm-badge-sale">For sale</span>{% endif %}
-      {% if p.is_verified %}<span class="hm-badge hm-badge-verified">{% icon "badge-check" 12 %} Verified</span>{% elif p.is_featured and not p.is_sample %}<span class="hm-badge hm-badge-featured">Featured</span>{% endif %}
+      {% if p.status == "under_offer" %}<span class="hm-badge hm-badge-new">Under offer</span>{% elif p.is_verified %}<span class="hm-badge hm-badge-verified">{% icon "badge-check" 12 %} Verified</span>{% elif p.is_featured and not p.is_sample %}<span class="hm-badge hm-badge-featured">Featured</span>{% endif %}
     </div>
     {% if img %}
       <img src="{% img_src img.image 800 %}" srcset="{% img_srcset img.image '400,800' %}" sizes="(max-width: 575px) 100vw, (max-width: 1199px) 50vw, 300px" alt="{{ img.alt }}" {% if eager %}fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async" {% if img.width %}width="{{ img.width }}" height="{{ img.height }}"{% endif %}>

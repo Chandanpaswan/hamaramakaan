@@ -91,7 +91,7 @@ def property_list(request, section="all", city_slug=None):
         # Filtered and empty result pages are not indexed, to avoid thin/duplicate pages.
         "noindex": filtered or page.paginator.count == 0,
         "canonical_path": base_url + (f"?page={page.number}" if page.number > 1 and not filtered else ""),
-        "section_cities": City.objects.filter(is_active=True, properties__status=Property.Status.PUBLISHED).distinct()[:12],
+        "section_cities": City.objects.filter(is_active=True, properties__status__in=Property.PUBLIC_STATUSES).distinct()[:12],
     }
     return render(request, "properties/list.html", context)
 

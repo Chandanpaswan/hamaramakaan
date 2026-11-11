@@ -126,7 +126,7 @@ def home(request):
     if user.has_perm("properties.view_property"):
         props = Property.objects.all()
         ctx["property_stats"] = {
-            "active": props.filter(status=Property.Status.PUBLISHED).count(),
+            "active": props.filter(status__in=Property.PUBLIC_STATUSES).count(),
             "pending": props.filter(status=Property.Status.PENDING).count(),
             "closed": props.filter(status__in=[Property.Status.SOLD, Property.Status.RENTED]).count(),
             "inactive": props.filter(status__in=[Property.Status.ARCHIVED, Property.Status.DRAFT,
@@ -282,6 +282,22 @@ def property_review(request, pk):
         notify(f"Your listing {prop.listing_id} has been {label}", body + f"\n\n– {site.brand_name}", [prop.owner_email])
     messages.success(request, f"Listing {label}.")
     return redirect("dashboard:property_detail", pk=pk)
+
+
+@perm_required("properties.delete_property")
+def property_delete(request, pk):
+    prop = get_object_or_404(Property, pk=pk)
+    if request.method == "POST":
+        label = f"{prop.listing_id} {prop.title}"
+        for image in prop.images.all():  # delete files too; a queryset cascade would orphan them in storage
+            image.delete()
+        prop.delete()
+        log_action(request, AuditLog.Action.DELETE, target_type="Property", target_id=pk, description=f"Deleted {label}"[:300])
+        messages.success(request, f"Property {label} deleted.")
+        return redirect("dashboard:property_list")
+    return render(request, "dashboard/property_confirm_delete.html", {
+        "property": prop, "lead_count": Lead.objects.filter(interested_property=prop).count(),
+    })
 
 
 @require_POST

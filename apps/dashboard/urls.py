@@ -15,6 +15,7 @@ urlpatterns = [
     path("properties/<int:pk>/", views.property_detail, name="property_detail"),
     path("properties/<int:pk>/edit/", views.property_edit, name="property_edit"),
     path("properties/<int:pk>/review/", views.property_review, name="property_review"),
+    path("properties/<int:pk>/delete/", views.property_delete, name="property_delete"),
     path("properties/<int:pk>/photos/", views.property_images_upload, name="property_images_upload"),
     path("properties/<int:pk>/photos/<int:image_pk>/", views.property_image_action, name="property_image_action"),
     # Leads

@@ -7,7 +7,7 @@
     <h1 class="h3 mb-1 mt-1">{{ property.title }}</h1>
     <div class="d-flex gap-2 flex-wrap align-items-center">
       <span class="text-meta">{{ property.listing_id }}</span>
-      <span class="hm-badge {% if property.status == 'published' %}hm-badge-verified{% elif property.status == 'pending' %}hm-badge-featured{% elif property.status == 'rejected' %}hm-badge-error{% else %}hm-badge-muted{% endif %}">{{ property.get_status_display }}</span>
+      <span class="hm-badge {% if property.status == 'published' %}hm-badge-verified{% elif property.status == 'under_offer' %}hm-badge-featured{% elif property.status == 'pending' %}hm-badge-featured{% elif property.status == 'rejected' %}hm-badge-error{% else %}hm-badge-muted{% endif %}">{{ property.get_status_display }}</span>
       {% if property.source == "owner" %}<span class="hm-badge hm-badge-new">Owner submission</span>{% endif %}
       {% if property.is_verified %}<span class="hm-badge hm-badge-verified">Verified</span>{% endif %}
       {% if property.is_featured %}<span class="hm-badge hm-badge-featured">Featured</span>{% endif %}
@@ -17,6 +17,7 @@
   <div class="d-flex gap-2">
     <a class="btn btn-secondary-hm" href="{{ property.get_absolute_url }}" target="_blank" rel="noopener">{% icon "eye" 16 %} {% if property.is_public %}View live{% else %}Preview{% endif %}</a>
     {% if perms.properties.change_property %}<a class="btn btn-primary" href="{% url 'dashboard:property_edit' property.pk %}">Edit</a>{% endif %}
+    {% if perms.properties.delete_property %}<a class="btn btn-outline-danger" href="{% url 'dashboard:property_delete' property.pk %}">Delete</a>{% endif %}
   </div>
 </div>
 

@@ -72,7 +72,7 @@ class Amenity(models.Model):
 
 class PropertyQuerySet(models.QuerySet):
     def public(self):
-        return self.filter(status=Property.Status.PUBLISHED)
+        return self.filter(status__in=Property.PUBLIC_STATUSES)
 
     def with_related(self):
         return self.select_related("property_type", "city", "locality", "city__state").prefetch_related("images")
@@ -89,6 +89,7 @@ class Property(SEOFieldsMixin, TimeStampedModel):
         PENDING = "pending", "Pending review"
         CORRECTION = "correction", "Returned for correction"
         PUBLISHED = "published", "Published"
+        UNDER_OFFER = "under_offer", "Under offer"
         REJECTED = "rejected", "Rejected"
         SOLD = "sold", "Sold"
         RENTED = "rented", "Rented out"
@@ -126,6 +127,8 @@ class Property(SEOFieldsMixin, TimeStampedModel):
         NORTH_WEST = "north_west", "North-West"
         SOUTH_EAST = "south_east", "South-East"
         SOUTH_WEST = "south_west", "South-West"
+
+    PUBLIC_STATUSES = (Status.PUBLISHED, Status.UNDER_OFFER)  # visible on the website
 
     listing_id = models.CharField(max_length=12, unique=True, editable=False, blank=True)
     title = models.CharField(max_length=140)
@@ -254,7 +257,7 @@ class Property(SEOFieldsMixin, TimeStampedModel):
 
     @property
     def is_public(self):
-        return self.status == self.Status.PUBLISHED
+        return self.status in self.PUBLIC_STATUSES
 
     @property
     def is_rental(self):

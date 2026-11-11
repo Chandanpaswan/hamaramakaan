@@ -69,7 +69,7 @@ class LocationSitemap(Sitemap):
 
     changefreq = "weekly"
     priority = 0.6
-    published = Q(properties__status=Property.Status.PUBLISHED)
+    published = Q(properties__status__in=Property.PUBLIC_STATUSES)
 
     def items(self):
         cities = City.objects.filter(is_active=True, is_indexable=True).annotate(n=Count("properties", filter=self.published)).filter(n__gt=0)

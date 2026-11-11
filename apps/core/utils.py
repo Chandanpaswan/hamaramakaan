@@ -66,6 +66,11 @@ def log_action(request_or_user, action, obj=None, description="", target_type=""
     )
 
 
+def phone_key(value):
+    """Comparable form of an Indian phone number: its last 10 digits (+91 98100 00000 == 09810000000)."""
+    return "".join(ch for ch in str(value or "") if ch.isdigit())[-10:]
+
+
 def unique_slugify(instance, value, slug_field="slug", max_length=80, queryset=None):
     base = slugify(value)[:max_length].strip("-") or "item"
     slug = base

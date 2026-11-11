@@ -1,9 +1,12 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.urls import reverse
+from django.utils import timezone
 
-from apps.core.utils import notify
+from apps.core.utils import notify, phone_key
 
-from .models import Lead, LeadStatusHistory
+from .models import Lead, LeadNote, LeadStatusHistory
 
 
 def create_lead_from_form(request, form, source, **extra):
@@ -12,13 +15,22 @@ def create_lead_from_form(request, form, source, **extra):
 
 
 def create_lead(request, lead, source, consent, **extra):
-    """Save an unsaved Lead, record its initial status and alert the team."""
+    """Save an unsaved Lead, record its initial status and alert the team.
+    A repeat enquiry (same phone, source and property/project within 24h) is added as a note to the existing lead."""
     lead.source = source
     lead.source_url = request.build_absolute_uri()[:500]
     lead.campaign = request.session.get("utm_campaign", "")[:120]
     lead.consent = consent
     for key, value in extra.items():
         setattr(lead, key, value)
+    recent = Lead.objects.filter(
+        source=source, interested_property_id=lead.interested_property_id, interested_project_id=lead.interested_project_id,
+        created_at__gte=timezone.now() - timedelta(hours=24),
+    ).order_by("-created_at")
+    for existing in recent:
+        if phone_key(existing.phone) == phone_key(lead.phone):
+            LeadNote.objects.create(lead=existing, note=f"Repeat enquiry from the website.\n{lead.message}".strip())
+            return existing
     lead.save()
     LeadStatusHistory.objects.create(lead=lead, to_status=lead.status)
     notify_new_lead(request, lead)

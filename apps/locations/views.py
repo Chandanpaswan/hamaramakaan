@@ -6,7 +6,7 @@ from apps.properties.models import Property
 
 from .models import City, Locality
 
-PUBLISHED = Q(properties__status=Property.Status.PUBLISHED)
+PUBLISHED = Q(properties__status__in=Property.PUBLIC_STATUSES)
 
 
 def city_detail(request, city_slug):

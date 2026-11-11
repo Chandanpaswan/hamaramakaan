@@ -1,0 +1,16 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Delete {{ property.listing_id }}{% endblock %}{% block heading %}Properties{% endblock %}
+{% block content %}
+<div class="panel" style="max-width:600px">
+  <div class="panel-body">
+    <h1 class="h4">Delete this property?</h1>
+    <p><strong>{{ property.listing_id }} · {{ property.title }}</strong> and its {{ property.images.count }} photo{{ property.images.count|pluralize }} will be permanently deleted. This cannot be undone.</p>
+    {% if lead_count %}<p class="small">{{ lead_count }} enquir{{ lead_count|pluralize:"y,ies" }} about it will be kept, without the property link.</p>{% endif %}
+    <p class="small text-meta">To hide a listing but keep its history, set its status to <em>Archived</em>, <em>Sold</em> or <em>Rented</em> instead.</p>
+    <form method="post" class="d-flex gap-2">{% csrf_token %}
+      <button class="btn btn-danger" type="submit">Yes, delete permanently</button>
+      <a class="btn btn-secondary-hm" href="{% url 'dashboard:property_detail' property.pk %}">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}
