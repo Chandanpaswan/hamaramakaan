@@ -1,11 +1,18 @@
 """
-Development-only SAMPLE data so the UI can be reviewed before real inventory exists.
-Every record is flagged `is_sample` and labelled “Sample” on the site. Refuses to run when DEBUG is False.
-Remove with:  python manage.py seed_demo --clear
+SAMPLE data so the UI can be reviewed before real inventory exists.
+Every record is flagged `is_sample`, labelled "Sample" on the site, noindexed and left out of the sitemap.
+Runs when DEBUG is True, or on production only with --allow-production (demo staff accounts are never
+created there). Photos are CC0 (public domain, no credit required), sourced via Openverse.
+Remove everything with:  python manage.py seed_demo --clear
 """
+import io
 import secrets
+import urllib.request
 from datetime import timedelta
 from decimal import Decimal
+
+from django.core.files.base import ContentFile
+from PIL import Image
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -18,7 +25,7 @@ from django.utils import timezone
 from apps.blog.models import BlogCategory, BlogPost
 from apps.leads.models import Lead, LeadNote, LeadStatusHistory
 from apps.locations.models import City, Locality
-from apps.properties.models import Amenity, Project, Property, PropertyType
+from apps.properties.models import Amenity, Project, Property, PropertyImage, PropertyType
 
 SAMPLE_NOTE = "\n\n(Sample listing for development and design review – not a real property.)"
 
@@ -37,6 +44,60 @@ LISTINGS = [
     ("Villa with private garden", "villa", "sale", "32000000", "4000", "sqft", 4, 5, "Sector 21", "semi", "ready", None, None, False),
     ("2 BHK apartment near metro", "apartment", "sale", "6100000", "1150", "sqft", 2, 2, "Sector 15", "semi", "ready", 5, 10, False),
 ]
+
+# CC0 1.0 photos (public domain) found via Openverse; key -> (image URL, source page).
+# StockSnap's CDN refuses scripted downloads, so those are fetched through Openverse's image proxy.
+OV = "https://api.openverse.org/v1/images/"
+PHOTOS = {
+    "tower-white": ("https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTA1L3Vwd2s2MTkwOTQzMC13aWtpbWVkaWEtaW1hZ2Uta293ZXFmMDguanBn.jpg", "https://www.rawpixel.com/image/3285824"),
+    "flats-colourful": (OV + "03a918e7-3077-4b46-8e19-3ff65d867817/thumb/?full_size=true", "https://stocksnap.io/photo/colorful-buildings-VLZ1NCPYDR"),
+    "flats-modern": (OV + "e517cec6-4866-4fb3-8791-58dd6b8e5cd2/thumb/?full_size=true", "https://stocksnap.io/photo/modern-design-DTZVUDUTRV"),
+    "flats-balcony": (OV + "b918d04b-6b09-4801-b883-44f474f5c17c/thumb/?full_size=true", "https://stocksnap.io/photo/apartments-condos-DVE0MEACPS"),
+    "flats-blue": (OV + "901ee435-0675-4150-a757-8800895ec071/thumb/?full_size=true", "https://stocksnap.io/photo/architecture-buildings-XVS8FFEABO"),
+    "house": ("https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZyYnJpY2tfaG91c2VfZXN0YXRlX3Jlc2lkZW50aWFsLWltYWdlLWt5YmU3OHByLmpwZw.jpg", "https://www.rawpixel.com/image/6040724"),
+    "villa-white": ("https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZsMzcxNjM0Nzc3NDEtaW1hZ2Uta3ljajg3MTAuanBn.jpg", "https://www.rawpixel.com/image/6078516"),
+    "villa-garden": ("https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvZmwzNjkwNDA3NTkyMC1pbWFnZS1reWJlam5xYS5qcGc.jpg", "https://www.rawpixel.com/image/6043060"),
+    "villa-pool": (OV + "d6a90e22-f5da-44c8-8d94-306473b902c9/thumb/?full_size=true", "https://stocksnap.io/photo/modern-house-UIU7D31EDY"),
+    "land": (OV + "192cc57b-baa0-4e43-bb13-f39eef2c1dc0/thumb/?full_size=true", "https://stocksnap.io/photo/rainbow-sky-PAQC3Z5YDJ"),
+    "shop": ("https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvcHgxNjk4OTItaW1hZ2Uta3d5cGhrNGkuanBn.jpg", "https://www.rawpixel.com/image/5951325"),
+    "office": (OV + "e5ebaabd-fc1e-4f51-b35f-de1f17f5a3d1/thumb/?full_size=true", "https://stocksnap.io/photo/office-interior-NSQTXCLWQ5"),
+    "warehouse": (OV + "1c14f234-1c40-476e-bde1-b9c42610b451/thumb/?full_size=true", "https://stocksnap.io/photo/warehouse-building-2EEE2092E1"),
+    "living-1": ("https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvcHUyMzM1MTgwLWltYWdlLWt3dndpYmE1LmpwZw.jpg", "https://www.rawpixel.com/image/5915137"),
+    "living-2": ("https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTA1L2lzMTU3OTYtaW1hZ2Uta3d2eWhleG0uanBn.jpg", "https://www.rawpixel.com/image/5927318"),
+    "living-3": ("https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvaXMxNTcxOC1pbWFnZS1rd3Z3dXcwZC5qcGc.jpg", "https://www.rawpixel.com/image/5917348"),
+    "living-4": ("https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvaXMxNTc5OC1pbWFnZS1rd3Z5Z29ycy5qcGc.jpg", "https://www.rawpixel.com/image/5927053"),
+    "living-5": ("https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvYTAwNS1zY290dHctMjg3LmpwZw.jpg", "https://www.rawpixel.com/image/430394"),
+    "living-6": ("https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvaXMxMzYwNy1pbWFnZS1rd3lzZTcwdi5qcGc.jpg", "https://www.rawpixel.com/image/5970065"),
+    "bedroom-1": ("https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvcHg5NDUzOTMtaW1hZ2Uta3d2dXI4YjYuanBn.jpg", "https://www.rawpixel.com/image/5903851"),
+    "bedroom-2": ("https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2lzMTU3NjAtaW1hZ2Uta3d2d3ZwcGsuanBn.jpg", "https://www.rawpixel.com/image/5917601"),
+    "bedroom-3": ("https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL3B4ODY3ODI3LWltYWdlLWt3dnhkdTZnLmpwZw.jpg", "https://www.rawpixel.com/image/5920688"),
+    "kitchen-1": ("https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvZmwzNjQ5MTQxMTM5My1pbWFnZS1reWJlank0aS5qcGc.jpg", "https://www.rawpixel.com/image/6043001"),
+    "kitchen-2": ("https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvcHgxMjczNjAzLWltYWdlLWt3dnkwOHJnLmpwZw.jpg", "https://www.rawpixel.com/image/5924425"),
+    "kitchen-3": ("https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL3B4MTI3NDc2NS1pbWFnZS1rd3Z3NXJ4dy5qcGc.jpg", "https://www.rawpixel.com/image/5912749"),
+    "kitchen-4": ("https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvcHgxMTA0NjM4LWltYWdlLWt3dndhdnZqLmpwZw.jpg", "https://www.rawpixel.com/image/5913547"),
+    "patio": (OV + "58682ac8-75ad-403a-8f84-413f10cdd203/thumb/?full_size=true", "https://stocksnap.io/photo/furniture-patio-KOIAWLY3SU"),
+}
+# Listing title -> photo keys (first = main photo).
+LISTING_PHOTOS = {
+    "3 BHK apartment with park view": ["tower-white", "living-2", "bedroom-3", "kitchen-3"],
+    "2 BHK builder floor near market": ["flats-colourful", "living-3", "kitchen-1"],
+    "4 BHK independent house with terrace": ["house", "living-4", "bedroom-2", "kitchen-4"],
+    "Residential plot in gated township": ["land"],
+    "2 BHK flat for rent, family preferred": ["flats-balcony", "living-5", "bedroom-1"],
+    "1 BHK furnished apartment on rent": ["living-1", "kitchen-2"],
+    "3 BHK under-construction apartment": ["flats-blue", "kitchen-2"],
+    "Ground-floor shop on main road": ["shop"],
+    "Furnished office space for lease": ["office"],
+    "Warehouse with truck access": ["warehouse"],
+    "Villa with private garden": ["villa-white", "villa-garden", "villa-pool", "living-6"],
+    "2 BHK apartment near metro": ["flats-modern", "living-6", "bedroom-3"],
+}
+PROJECT_PHOTOS = {"Sample Greens Residency": "flats-blue", "Sample Heights": "tower-white"}
+POST_PHOTOS = {
+    "Documents to check before buying a flat in Faridabad": "patio",
+    "How to prepare your home for a quick rental": "living-3",
+    "Understanding super area vs carpet area": "kitchen-3",
+}
 
 POSTS = [
     ("Documents to check before buying a flat in Faridabad", "Buying guides",
@@ -57,11 +118,14 @@ class Command(BaseCommand):
     help = "Load clearly-labelled SAMPLE listings, projects, posts, leads and demo staff (development only)."
 
     def add_arguments(self, parser):
-        parser.add_argument("--clear", action="store_true", help="Delete all sample data and demo users.")
+        parser.add_argument("--clear", action="store_true", help="Delete all sample data, its photos and demo users.")
+        parser.add_argument("--allow-production", action="store_true",
+                            help="Allow running with DEBUG=False (sample records stay labelled and noindexed).")
+        parser.add_argument("--no-photos", action="store_true", help="Skip downloading the CC0 sample photos.")
 
     def handle(self, *args, **options):
-        if not settings.DEBUG:
-            raise CommandError("seed_demo only runs with DEBUG=True. Never load sample data in production.")
+        if not settings.DEBUG and not options["allow_production"]:
+            raise CommandError("DEBUG is False. Re-run with --allow-production to load clearly labelled sample data.")
         if options["clear"]:
             return self.clear()
         call_command("seed_content", verbosity=0)
@@ -69,16 +133,75 @@ class Command(BaseCommand):
             self.create_listings()
             self.create_projects()
             self.create_posts()
-            users = self.create_users()
+            users = self.create_users() if settings.DEBUG else {}  # never create demo logins on a live site
             self.create_leads(users)
+        if not options["no_photos"]:
+            self.attach_photos()
 
     def clear(self):
+        # Delete photo files explicitly: queryset deletes skip model delete() and would orphan stored files.
+        for image in PropertyImage.objects.filter(property__is_sample=True):
+            image.delete()
+        for obj, field in [*((p, "cover_image") for p in Project.objects.filter(is_sample=True)),
+                           *((b, "featured_image") for b in BlogPost.objects.filter(is_sample=True))]:
+            getattr(obj, field).delete(save=False)
         Lead.objects.filter(email__endswith="@example.com").delete()
         Property.objects.filter(is_sample=True).delete()
         Project.objects.filter(is_sample=True).delete()
-        BlogPost.objects.filter(body__contains="sample article text").delete()
+        BlogPost.objects.filter(is_sample=True).delete()
         get_user_model().objects.filter(username__startswith="demo-").delete()
-        self.stdout.write(self.style.SUCCESS("Sample data removed."))
+        self.stdout.write(self.style.SUCCESS("Sample data and photos removed."))
+
+    # -- photos ------------------------------------------------------------------------------
+    def _photo(self, key):
+        """Download a CC0 photo once, verify it is a real image and return it as a <=1600px JPEG."""
+        cache = self.__dict__.setdefault("_photo_cache", {})
+        if key not in cache:
+            url, _source = PHOTOS[key]
+            req = urllib.request.Request(url, headers={"User-Agent": "sample-data-seeder/1.0"})
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                raw = resp.read(10 * 1024 * 1024)
+            with Image.open(io.BytesIO(raw)) as img:
+                img = img.convert("RGB")
+                img.thumbnail((1600, 1600))
+                out = io.BytesIO()
+                img.save(out, "JPEG", quality=82, optimize=True)
+            cache[key] = out.getvalue()
+        return ContentFile(cache[key], name=f"{key}.jpg")
+
+    def attach_photos(self):
+        added, failed = 0, []
+        for prop in Property.objects.filter(is_sample=True, title__in=LISTING_PHOTOS).prefetch_related("images"):
+            if prop.images.exists():
+                continue
+            for order, key in enumerate(LISTING_PHOTOS[prop.title]):
+                try:
+                    PropertyImage.objects.create(
+                        property=prop, image=self._photo(key), sort_order=order, is_primary=order == 0,
+                        alt_text=f"{prop.title} – sample photo {order + 1}"[:160],
+                        caption="Sample photo (CC0, public domain)",
+                    )
+                    added += 1
+                except Exception as exc:  # noqa: BLE001 - a missing photo must not stop the seed
+                    failed.append(f"{key}: {exc}")
+        for model, mapping, field, alt_field, name_field in [
+            (Project, PROJECT_PHOTOS, "cover_image", "cover_image_alt", "name"),
+            (BlogPost, POST_PHOTOS, "featured_image", "featured_image_alt", "title"),
+        ]:
+            for obj in model.objects.filter(is_sample=True, **{f"{name_field}__in": mapping}):
+                if getattr(obj, field):
+                    continue
+                try:
+                    getattr(obj, field).save(f"{mapping[getattr(obj, name_field)]}.jpg",
+                                             self._photo(mapping[getattr(obj, name_field)]), save=False)
+                    setattr(obj, alt_field, f"{getattr(obj, name_field)} – sample photo")
+                    obj.save()
+                    added += 1
+                except Exception as exc:  # noqa: BLE001
+                    failed.append(f"{obj}: {exc}")
+        self.stdout.write(self.style.SUCCESS(f"Sample photos attached: {added}."))
+        for line in failed:
+            self.stdout.write(self.style.WARNING(f"  skipped {line}"))
 
     def create_listings(self):
         city = City.objects.get(slug="faridabad")
@@ -127,10 +250,12 @@ class Command(BaseCommand):
 
     def create_posts(self):
         for i, (title, cat, excerpt) in enumerate(POSTS):
-            BlogPost.objects.get_or_create(title=title, defaults=dict(
+            post, created = BlogPost.objects.get_or_create(title=title, defaults=dict(
                 excerpt=excerpt, body=POST_BODY, category=BlogCategory.objects.get(name=cat),
                 status=BlogPost.Status.PUBLISHED, published_at=timezone.now() - timedelta(days=3 * i), is_featured=i == 0,
             ))
+            if created or "sample article text" in post.body:  # also flags posts made by older versions of this seed
+                BlogPost.objects.filter(pk=post.pk).update(is_sample=True)
 
     def create_users(self):
         User = get_user_model()

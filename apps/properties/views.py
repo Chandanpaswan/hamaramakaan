@@ -149,7 +149,7 @@ def property_detail(request, slug):
         "related": related,
         "preview": preview,
         "breadcrumbs": breadcrumbs,
-        "noindex": preview,
+        "noindex": preview or prop.is_sample,  # sample listings must never appear in search results
     })
 
 
@@ -194,7 +194,7 @@ def project_detail(request, slug):
             messages.error(request, "Please correct the highlighted fields.")
     listings = Property.objects.public().with_related().filter(project_name__iexact=project.name)[:4]
     return render(request, "properties/project_detail.html", {
-        "project": project, "form": form, "preview": preview, "listings": listings, "noindex": preview,
+        "project": project, "form": form, "preview": preview, "listings": listings, "noindex": preview or project.is_sample,
     })
 
 

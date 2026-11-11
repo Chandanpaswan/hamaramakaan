@@ -40,4 +40,5 @@ def post_detail(request, slug):
         extra = BlogPost.objects.published().filter(category=post.category).exclude(pk=post.pk).exclude(
             pk__in=[r.pk for r in related])[: 3 - len(related)]
         related += list(extra)
-    return render(request, "blog/detail.html", {"post": post, "related": related, "preview": preview, "noindex": preview})
+    return render(request, "blog/detail.html", {"post": post, "related": related, "preview": preview,
+                                                "noindex": preview or post.is_sample})

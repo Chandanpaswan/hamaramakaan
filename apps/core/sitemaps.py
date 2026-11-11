@@ -25,7 +25,7 @@ class PropertySitemap(Sitemap):
     priority = 0.7
 
     def items(self):
-        return Property.objects.public().only("slug", "updated_at")
+        return Property.objects.public().filter(is_sample=False).only("slug", "updated_at")
 
     def lastmod(self, obj):
         return obj.updated_at
@@ -36,7 +36,7 @@ class ProjectSitemap(Sitemap):
     priority = 0.6
 
     def items(self):
-        return Project.objects.public().only("slug", "updated_at")
+        return Project.objects.public().filter(is_sample=False).only("slug", "updated_at")
 
     def lastmod(self, obj):
         return obj.updated_at
@@ -47,7 +47,7 @@ class BlogSitemap(Sitemap):
     priority = 0.6
 
     def items(self):
-        return BlogPost.objects.published().only("slug", "updated_at")
+        return BlogPost.objects.published().filter(is_sample=False).only("slug", "updated_at")
 
     def lastmod(self, obj):
         return obj.updated_at

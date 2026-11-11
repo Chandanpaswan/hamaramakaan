@@ -66,6 +66,25 @@ class CanonicalAndImageTests(TestCase):
             self.assertEqual(img_srcset(blob), "")
 
 
+class SampleDataTests(TestCase):
+    def test_sample_content_is_noindexed_and_kept_out_of_sitemap(self):
+        sample = make_property(title="Sample home")
+        Property.objects.filter(pk=sample.pk).update(is_sample=True)
+        post = BlogPost.objects.create(title="Sample post", body="x", status=BlogPost.Status.PUBLISHED)
+        BlogPost.objects.filter(pk=post.pk).update(is_sample=True)
+        self.assertContains(self.client.get(sample.get_absolute_url()), 'content="noindex')
+        self.assertContains(self.client.get(post.get_absolute_url()), 'content="noindex')
+        body = self.client.get("/sitemap.xml").content.decode()
+        self.assertNotIn(sample.get_absolute_url(), body)
+        self.assertNotIn(post.get_absolute_url(), body)
+
+    def test_seed_demo_refuses_production_without_flag(self):
+        from django.core.management import CommandError, call_command
+
+        with self.settings(DEBUG=False), self.assertRaises(CommandError):
+            call_command("seed_demo", "--no-photos")
+
+
 class BlogTests(TestCase):
     def test_draft_and_future_posts_hidden(self):
         draft = BlogPost.objects.create(title="Draft", body="x")

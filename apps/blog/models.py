@@ -78,6 +78,7 @@ class BlogPost(SEOFieldsMixin, TimeStampedModel):
     is_featured = models.BooleanField(default=False)
     canonical_url = models.URLField(blank=True, help_text="Only if this article's original lives at another URL.")
     related_posts = models.ManyToManyField("self", blank=True, symmetrical=False)
+    is_sample = models.BooleanField(default=False, editable=False, help_text="Sample content (noindexed).")
 
     objects = BlogPostQuerySet.as_manager()
 
