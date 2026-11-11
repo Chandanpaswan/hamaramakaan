@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{% if place.seo_title %}{{ place.seo_title }}{% else %}Property in {{ place.name }}{% if locality %}, {{ city.name }}{% endif %} – buy, rent &amp; commercial{% endif %} | {{ site.brand_name }}{% endblock %}
+{% block title %}{% if place.seo_title %}{{ place.seo_title }}{% else %}Property in {{ place.name }}{% if locality %}, {{ city.name }}{% endif %}{% endif %} | {{ brand_short }}{% endblock %}
 {% block meta_description %}{% if place.seo_description %}{{ place.seo_description }}{% else %}Flats, houses, plots and commercial property for sale and rent in {{ place.name }}{% if locality %}, {{ city.name }}{% endif %}. Listings reviewed by {{ site.brand_name }}.{% endif %}{% endblock %}
 {% block content %}
 <div class="page-hero">

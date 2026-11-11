@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ project.seo_title|default:project.name }}{% if not project.seo_title %} – {{ project.location_label }}{% endif %} | {{ site.brand_name }}{% endblock %}
+{% block title %}{{ project.seo_title|default:project.name }}{% if not project.seo_title %} – {{ project.location_label }}{% endif %} | {{ brand_short }}{% endblock %}
 {% block meta_description %}{{ project.seo_description|default:project.description|truncatechars:160 }}{% endblock %}
 {% block body_class %}has-mobile-cta{% endblock %}
 {% block content %}

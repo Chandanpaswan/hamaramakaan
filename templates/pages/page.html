@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ page.seo_title|default:page.title }} | {{ site.brand_name }}{% endblock %}
+{% block title %}{{ page.seo_title|default:page.title }} | {{ brand_short }}{% endblock %}
 {% block meta_description %}{{ page.seo_description|default:page.intro|default:site.default_meta_description }}{% endblock %}
 {% block content %}
 <div class="page-hero">

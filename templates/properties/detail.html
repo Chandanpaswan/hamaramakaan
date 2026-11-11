@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ property.seo_title|default:property.title }}{% if not property.seo_title %} in {{ property.location_label }}{% endif %} | {{ site.brand_name }}{% endblock %}
+{% block title %}{{ property.seo_title|default:property.title }}{% if not property.seo_title %}, {{ property.city.name }}{% endif %} | {{ brand_short }}{% endblock %}
 {% block meta_description %}{% if property.seo_description %}{{ property.seo_description }}{% else %}{{ property.title }} for {{ property.get_purpose_display|lower }} in {{ property.location_label }}{% if property.price %} at {{ property.price|inr_short }}{% endif %}. {{ property.area|num }} {{ property.get_area_unit_display }}. Listing ID {{ property.listing_id }}.{% endif %}{% endblock %}
 {% block og_title %}{{ property.title }} – {{ property.location_label }}{% endblock %}
 {% block og_image %}{% with img=images.0 %}{% if img %}{% absolute_url img.image.url %}{% else %}{{ block.super }}{% endif %}{% endwith %}{% endblock %}

@@ -41,7 +41,8 @@ def site(request):
     is_dashboard = path.startswith(f"/{settings.DASHBOARD_PATH}")
     context = {
         "canonical_base": canonical_base(request),
-        "site": SiteSetting.load(),
+        "site": (site_settings := SiteSetting.load()),
+        "brand_short": site_settings.brand_name.removesuffix(" Properties"),  # short suffix keeps <title> under ~60-70 chars
         "DASHBOARD_PATH": settings.DASHBOARD_PATH,
         "DEBUG": settings.DEBUG,
         "is_dashboard": is_dashboard,

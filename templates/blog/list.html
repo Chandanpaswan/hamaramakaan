@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{% if category %}{{ category.name }} – {% endif %}Property guides &amp; news{% if page_obj.number > 1 %} – page {{ page_obj.number }}{% endif %} | {{ site.brand_name }} blog{% endblock %}
+{% block title %}{% if category %}{{ category.name }} – {% endif %}Property guides &amp; news{% if page_obj.number > 1 %} – page {{ page_obj.number }}{% endif %} | {{ brand_short }}{% endblock %}
 {% block meta_description %}{% if category.description %}{{ category.description }}{% else %}Buying guides, rental tips and local insights on Faridabad and Delhi NCR real estate from {{ site.brand_name }}.{% endif %}{% endblock %}
 {% block content %}
 <div class="page-hero">

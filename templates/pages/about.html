@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% load static %}
-{% block title %}{{ page.seo_title|default:"About us" }} | {{ site.brand_name }}{% endblock %}
+{% block title %}{{ page.seo_title|default:"About us" }} | {{ brand_short }}{% endblock %}
 {% block meta_description %}{{ page.seo_description|default:page.intro }}{% endblock %}
 {% block content %}
 <section class="hero" style="padding:56px 0 64px" aria-labelledby="about-title">
