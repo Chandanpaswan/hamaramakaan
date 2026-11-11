@@ -13,7 +13,7 @@
     {% endif %}
   </div>
   <div class="pc-body">
-    <div class="pc-price">{% if project.price_from %}{{ project.price_from|inr_short }}{% if project.price_to %} to {{ project.price_to|inr_short|cut:"₹ " }}{% endif %}{% else %}Price on request{% endif %}</div>
+    <div class="pc-price">{% if project.price_from %}{{ project.price_from|inr_short }}{% if project.price_to %} – {{ project.price_to|inr_short|cut:"₹ " }}{% endif %}{% else %}Price on request{% endif %}</div>
     <h3 class="pc-title"><a href="{{ project.get_absolute_url }}">{{ project.name }}</a></h3>
     <p class="pc-loc">{% icon "map-pin" 14 %} {{ project.location_label }}</p>
     <div class="pc-facts">

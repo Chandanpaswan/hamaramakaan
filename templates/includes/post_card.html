@@ -8,6 +8,6 @@
     {% if post.category %}<span class="hm-badge hm-badge-info align-self-start">{{ post.category.name }}</span>{% endif %}
     <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
     {% if post.excerpt %}<p class="small text-meta mb-3">{{ post.excerpt|truncatechars:140 }}</p>{% endif %}
-    <p class="post-meta mt-auto mb-0">{{ post.published_at|date:"j M Y" }}, {{ post.reading_minutes }} min read</p>
+    <p class="post-meta mt-auto mb-0">{{ post.published_at|date:"j M Y" }} · {{ post.reading_minutes }} min read</p>
   </div>
 </article>

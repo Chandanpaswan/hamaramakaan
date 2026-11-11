@@ -11,7 +11,7 @@
 </script>
 {% endblock %}
 {% block content %}
-{% if preview %}<div class="preview-banner"><div class="container">Preview: this article is “{{ post.get_status_display }}” and not yet public.</div></div>{% endif %}
+{% if preview %}<div class="preview-banner"><div class="container">Preview – this article is “{{ post.get_status_display }}” and not yet public.</div></div>{% endif %}
 <article class="container section-sm">
   <div class="article">
     <nav aria-label="Breadcrumb"><ol class="breadcrumb">
@@ -21,7 +21,7 @@
       <li class="breadcrumb-item active" aria-current="page">{{ post.title|truncatechars:40 }}</li>
     </ol></nav>
     <h1>{{ post.title }}</h1>
-    <p class="post-meta mb-4">By {{ post.author_name }}, <time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"j F Y" }}</time>, {{ post.reading_minutes }} min read</p>
+    <p class="post-meta mb-4">By {{ post.author_name }} · <time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"j F Y" }}</time> · {{ post.reading_minutes }} min read</p>
     {% if post.featured_image %}<img class="w-100 h-auto rounded-4 mb-4" src="{% img_src post.featured_image 1200 %}" srcset="{% img_srcset post.featured_image '800,1200,1600' %}" sizes="(max-width: 800px) 100vw, 760px" alt="{{ post.featured_image_alt|default:post.title }}" fetchpriority="high">{% endif %}
     {% if post.excerpt %}<p class="lead text-ink">{{ post.excerpt }}</p>{% endif %}
     <div class="rich-text">{{ post.body|rich_text }}</div>
