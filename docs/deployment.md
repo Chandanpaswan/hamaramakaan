@@ -31,147 +31,88 @@ DJANGO_SETTINGS_MODULE=config.settings.production DJANGO_SECRET_KEY=local-mainte
 
 ---
 
-## Option B: Your own server (Ubuntu 24.04 · Nginx · Gunicorn · PostgreSQL)
+## Option B: VPS (Hostinger KVM 1 · Ubuntu 24.04 · Nginx · Gunicorn · PostgreSQL) with GitHub Actions
 
-> Never use `runserver` in production. Production settings refuse to start without `DJANGO_SECRET_KEY` and `DJANGO_ALLOWED_HOSTS`.
+| Branch | Site | Server folder | Service |
+|---|---|---|---|
+| `main` | https://hamaramakaan.com (www → bare domain) | `/srv/hamara_makaan/prod` | `hamara-makaan@prod` |
+| `dev` | https://dev.hamaramakaan.com (password-protected, noindexed) | `/srv/hamara_makaan/dev` | `hamara-makaan@dev` |
 
-## 1. Server packages
+Each environment has its own database, `.env`, media folder and Gunicorn service. Files: `deploy/` (server setup, Nginx, systemd, release script) and `.github/workflows/deploy.yml`.
 
-```bash
-sudo apt update && sudo apt install -y python3 python3-venv python3-dev build-essential \
-     postgresql nginx certbot python3-certbot-nginx redis-server git
-sudo adduser --system --group --home /srv/hamara_makaan hm
-```
+**Every push** runs the tests. If they pass, a push to `main` or `dev` uploads the code over SSH (rsync) and runs `deploy/release.sh`. That script installs requirements, backs up the prod database, migrates, collects static files, reloads Gunicorn with zero downtime, and smoke-tests the site.
 
-## 2. PostgreSQL
+### One-time setup
 
-```bash
-sudo -u postgres psql <<'SQL'
-CREATE USER hamara_makaan WITH PASSWORD 'use-a-long-random-password';
-CREATE DATABASE hamara_makaan OWNER hamara_makaan ENCODING 'UTF8';
-SQL
-```
+1. **DNS** (at your domain registrar): add `A` records for `@`, `www` and `dev`, each pointing to the VPS IP. Remove any old `A`/`CNAME` records for those names (for example, Vercel's).
+2. **Deploy key** (on your PC): `ssh-keygen -t ed25519 -f hm_deploy -N "" -C hm-deploy`. This creates `hm_deploy` (private) and `hm_deploy.pub`.
+3. **Server** (VPS must be Ubuntu 24.04; reinstall the OS from hPanel if needed):
+   ```bash
+   scp -r deploy root@<VPS_IP>:/root/hm-deploy
+   ssh root@<VPS_IP>
+   cd /root/hm-deploy
+   DEPLOY_PUBKEY="<paste the one line from hm_deploy.pub>" CERTBOT_EMAIL=<your email> bash server-setup.sh
+   ```
+   The script installs the packages, firewall, the `hm` user, both databases with random passwords, `/srv/hamara_makaan/{prod,dev}/.env`, systemd, Nginx and HTTPS. The dev site's login is saved in `/root/hamaramakaan-credentials.txt`.
+4. **GitHub** → repo → Settings → Secrets and variables → Actions:
+   - `VPS_HOST`: the VPS IP
+   - `VPS_SSH_KEY`: the full contents of `hm_deploy` (the private key)
+   - optional: `VPS_PORT` (if SSH is not on 22) and `VPS_KNOWN_HOSTS` (output of `ssh-keyscan <VPS_IP>`, which pins the host key)
+5. **First deploys:** `git push origin dev` (creates the dev site), then push or merge to `main`.
+6. **Once per environment** (example for prod):
+   ```bash
+   ssh root@<VPS_IP>
+   sudo -iu hm
+   cd prod/app
+   set -a; . ../.env; set +a
+   export DJANGO_SETTINGS_MODULE=config.settings.production
+   ../venv/bin/python manage.py seed_content --domain hamaramakaan.com   # dev: --domain dev.hamaramakaan.com
+   ../venv/bin/python manage.py createsuperuser
+   ```
+7. **Email:** fill in `EMAIL_*` and `LEAD_NOTIFICATION_EMAILS` in `/srv/hamara_makaan/prod/.env`, then run `systemctl restart hamara-makaan@prod`.
 
-## 3. Application
+### Moving the live data off Vercel
 
-```bash
-sudo -u hm -H bash
-cd /srv/hamara_makaan
-git clone <repository-url> app && cd app/hamara_makaan
-python3 -m venv /srv/hamara_makaan/venv
-/srv/hamara_makaan/venv/bin/pip install -r requirements/production.txt
-cp .env.example .env && chmod 600 .env     # then edit .env
-```
+Do this **before the first push to `main`**, so customers never see an empty site.
 
-Minimum production `.env`:
+- **Database:** `pg_dump -Fc --no-owner --no-acl "<Neon DATABASE_URL>" -f hm.dump` on your PC. Copy it to the server with `scp`, then run:
+  `pg_restore --clean --if-exists --no-owner --no-acl -h 127.0.0.1 -U hamara_makaan_prod -d hamara_makaan_prod hm.dump`
+  (the password is `DB_PASSWORD` in `prod/.env`).
+- **Photos:** the simplest option is to add the existing `BLOB_READ_WRITE_TOKEN=…` line to `prod/.env`. Photos then keep being served from Vercel Blob, unchanged. To move them onto the VPS later, download each blob into `/srv/hamara_makaan/prod/media/<same pathname>` and remove the token.
+- **Then** in Vercel → Project → Settings → Git, disconnect the repository. Otherwise every push to `main` deploys to both places.
 
-```ini
-DJANGO_SETTINGS_MODULE=config.settings.production
-DJANGO_SECRET_KEY=<50+ random characters>
-DJANGO_ALLOWED_HOSTS=hamaramakaan.com,www.hamaramakaan.com
-DJANGO_CSRF_TRUSTED_ORIGINS=https://hamaramakaan.com,https://www.hamaramakaan.com
-USE_X_FORWARDED_FOR=true
-DB_ENGINE=postgres
-DB_PASSWORD=<postgres password>
-REDIS_URL=redis://127.0.0.1:6379/1
-MEDIA_ROOT=/srv/hamara_makaan/media
-EMAIL_HOST=<smtp host>  EMAIL_HOST_USER=…  EMAIL_HOST_PASSWORD=…
-LEAD_NOTIFICATION_EMAILS=sales@hamaramakaan.com
-DASHBOARD_PATH=<non-obvious>/      # e.g. hm-staff-7q2/
-DJANGO_ADMIN_PATH=<non-obvious>/
-```
+### Before go-live: hamaramakaan.com stays on the old site
 
-Then:
+`server-setup.sh` enables `deploy/nginx/hamaramakaan-old-site.conf` for `hamaramakaan.com` and `www` by default. That config forwards every request to the old server (`190.92.174.187`), so you can point `@`/`www` DNS at the VPS and visitors still see the current website. The Django code runs only on dev.hamaramakaan.com. Pushes to `main` still deploy to `/srv/hamara_makaan/prod`, but Nginx doesn't send any traffic there.
 
-```bash
-export $(grep -v '^#' .env | xargs)  # or let systemd load it
-V=/srv/hamara_makaan/venv/bin/python
-$V manage.py migrate
-$V manage.py createcachetable         # only if REDIS_URL is not set
-$V manage.py collectstatic --noinput
-$V manage.py seed_content --domain hamaramakaan.com
-$V manage.py createsuperuser
-$V manage.py check --deploy
-```
-
-## 4. Gunicorn (systemd)
-
-`/etc/systemd/system/hamara-makaan.service`
-
-```ini
-[Unit]
-Description=Hamara Makaan Django app
-After=network.target postgresql.service
-
-[Service]
-User=hm
-Group=www-data
-WorkingDirectory=/srv/hamara_makaan/app/hamara_makaan
-EnvironmentFile=/srv/hamara_makaan/app/hamara_makaan/.env
-ExecStart=/srv/hamara_makaan/venv/bin/gunicorn config.wsgi:application \
-          --bind unix:/run/hamara-makaan.sock --workers 3 --timeout 60 --access-logfile -
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
-```
+After moving `@`/`www` DNS to the VPS, get the HTTPS certificate right away (HTTPS shows a certificate warning until you do):
 
 ```bash
-sudo systemctl daemon-reload && sudo systemctl enable --now hamara-makaan
+certbot --nginx --redirect -d hamaramakaan.com -d www.hamaramakaan.com
 ```
 
-## 5. Nginx
+### Going live on hamaramakaan.com
 
-`/etc/nginx/sites-available/hamaramakaan`
-
-```nginx
-server {
-    listen 80;
-    server_name hamaramakaan.com www.hamaramakaan.com;
-    client_max_body_size 60M;   # up to 10 photos × 5 MB
-
-    location /media/ {
-        alias /srv/hamara_makaan/media/;
-        expires 30d;
-        add_header X-Content-Type-Options nosniff;
-        # Never execute anything from uploads
-        location ~* \.(php|py|pl|sh|cgi|html?)$ { deny all; }
-    }
-    location / {
-        proxy_pass http://unix:/run/hamara-makaan.sock;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
+Once the live data has been copied (see above):
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/hamaramakaan /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d hamaramakaan.com -d www.hamaramakaan.com   # HTTPS
+rm /etc/nginx/sites-enabled/hamaramakaan-old-site.conf
+ln -s /etc/nginx/sites-available/hamaramakaan.conf /etc/nginx/sites-enabled/
+certbot --nginx --redirect -d hamaramakaan.com -d www.hamaramakaan.com   # reuses the existing certificate
+nginx -t && systemctl reload nginx
 ```
 
-Static files are served by WhiteNoise, with hashed filenames and long cache lifetimes.
+(Re-running `server-setup.sh` with `PROD_LIVE=1` does the same thing.)
 
-Redirect the other domain:
-- To send `www` to the bare domain, or the reverse, add a separate `server` block that returns `301`.
-- Once the business decides `hamaramakaanproperties.com` should redirect, give it a `server` block with `return 301 https://hamaramakaan.com$request_uri;`.
+### Day to day
 
-## 6. Releasing an update
+- **Release:** merge to `dev`, check https://dev.hamaramakaan.com, then merge `dev` into `main`.
+- **Rollback:** revert the commit and push. If a migration changed data, first restore the latest `/srv/hamara_makaan/backups/pre-deploy-*.sql.gz` with `gunzip -c <file> | psql -h 127.0.0.1 -U hamara_makaan_prod hamara_makaan_prod`.
+- **Running version:** `cat /srv/hamara_makaan/prod/app/REVISION`
 
-```bash
-cd /srv/hamara_makaan/app && git pull
-/srv/hamara_makaan/venv/bin/pip install -r hamara_makaan/requirements/production.txt
-cd hamara_makaan && ../../venv/bin/python manage.py migrate && ../../venv/bin/python manage.py collectstatic --noinput
-sudo systemctl restart hamara-makaan
-```
-
-**Rollback:** take a database backup before running `migrate` (see `backup-restore.md`). Then `git checkout <previous tag>`, restore the backup if a migration changed data, and restart.
-
-## 7. Monitoring
+### Monitoring
 
 - **Uptime:** an external check on `/` and `/robots.txt`.
 - **Errors:** add Sentry (`pip install sentry-sdk`) and initialise it in `config/settings/production.py` from a `SENTRY_DSN` env var.
-- **Logs:** `journalctl -u hamara-makaan -f` and `/var/log/nginx/`.
+- **Logs:** `journalctl -u hamara-makaan@prod -f` and `/var/log/nginx/`.
 - **Search:** watch Search Console coverage and 404s weekly for the first two months.

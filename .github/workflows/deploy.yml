@@ -1,0 +1,59 @@
+# Tests every push and PR. Deploys to the VPS:
+#   push to main -> https://hamaramakaan.com      (prod)
+#   push to dev  -> https://dev.hamaramakaan.com  (dev)
+# Secrets: VPS_HOST, VPS_SSH_KEY; optional: VPS_PORT (default 22), VPS_KNOWN_HOSTS.
+name: CI / Deploy
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements/*.txt
+      - run: pip install -r requirements/development.txt
+      - run: python manage.py test tests --settings=config.settings.test
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'dev')
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
+    env:
+      TARGET: ${{ github.ref_name == 'main' && 'prod' || 'dev' }}
+      HOST: ${{ secrets.VPS_HOST }}
+      PORT: ${{ secrets.VPS_PORT || '22' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        env:
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
+          # shortcut: trusts the host key on first sight when VPS_KNOWN_HOSTS is unset; set it to pin the key
+          if [ -n "$KNOWN_HOSTS" ]; then printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else ssh-keyscan -p "$PORT" "$HOST" > ~/.ssh/known_hosts; fi
+
+      - name: Upload code
+        run: |
+          rsync -az --delete --exclude-from=deploy/rsync-exclude.txt \
+            -e "ssh -i ~/.ssh/id_deploy -p $PORT" ./ "hm@$HOST:/srv/hamara_makaan/$TARGET/app/"
+
+      - name: Release
+        run: ssh -i ~/.ssh/id_deploy -p "$PORT" "hm@$HOST" "bash /srv/hamara_makaan/$TARGET/app/deploy/release.sh $TARGET $GITHUB_SHA"

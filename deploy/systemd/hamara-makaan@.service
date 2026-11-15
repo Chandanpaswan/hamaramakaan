@@ -1,0 +1,38 @@
+# Gunicorn service template. One instance per environment:
+#   hamara-makaan@prod  -> https://hamaramakaan.com
+#   hamara-makaan@dev   -> https://dev.hamaramakaan.com
+# Worker count comes from WEB_CONCURRENCY in /srv/hamara_makaan/<env>/.env
+[Unit]
+Description=Hamara Makaan Django app (%i)
+After=network.target postgresql.service redis-server.service
+Wants=postgresql.service redis-server.service
+
+[Service]
+Type=notify
+NotifyAccess=main
+User=hm
+Group=www-data
+WorkingDirectory=/srv/hamara_makaan/%i/app
+Environment=DJANGO_SETTINGS_MODULE=config.settings.production
+EnvironmentFile=/srv/hamara_makaan/%i/.env
+RuntimeDirectory=hamara-makaan-%i
+RuntimeDirectoryMode=0755
+ExecStart=/srv/hamara_makaan/%i/venv/bin/gunicorn config.wsgi:application \
+          --bind unix:/run/hamara-makaan-%i/gunicorn.sock --umask 007 \
+          --timeout 60 --graceful-timeout 30 --max-requests 1000 --max-requests-jitter 100 \
+          --access-logfile - --error-logfile -
+# `systemctl reload` = zero-downtime code reload (new workers, old ones finish their requests)
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=35
+Restart=on-failure
+RestartSec=3
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
