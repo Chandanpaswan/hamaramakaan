@@ -104,6 +104,9 @@ nginx -t && systemctl reload nginx
 
 (Re-running `server-setup.sh` with `PROD_LIVE=1` does the same thing.)
 
+Or do all of it in one step: deploy, the nginx swap, HTTPS and a final check. As root, run:
+`CERTBOT_EMAIL=you@example.com bash /srv/hamara_makaan/prod/app/deploy/go-live.sh`
+
 ### Day to day
 
 - **Release:** merge to `dev`, check https://dev.hamaramakaan.com, then merge `dev` into `main`.
